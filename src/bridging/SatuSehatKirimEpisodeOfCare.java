@@ -72,7 +72,7 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
 
         tabMode = new DefaultTableModel(null, new String[]{
             "P", "Tanggal Registrasi", "No.Rawat", "No.RM", "Nama Pasien", "No.KTP Pasien", "Stts Rawat", "Stts Lanjut",
-            "Tanggal Pulang", "ID Encounter", "ICD 10", "Nama Penyakit", "ID Episode Of Care"
+            "Tanggal Pulang", "ID Encounter", "ICD 10", "Nama Penyakit", "Label Episode", "ID Episode Of Care"
         }) {
             @Override
             public boolean isCellEditable(int rowIndex, int colIndex) {
@@ -85,7 +85,7 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
             Class[] types = new Class[]{
                 java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
                 java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class,
-                java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
             @Override
@@ -99,7 +99,7 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
         tbObat.setPreferredScrollableViewportSize(new Dimension(500, 500));
         tbObat.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        for (i = 0; i < 13; i++) {
+        for (i = 0; i < 14; i++) {
             TableColumn column = tbObat.getColumnModel().getColumn(i);
             if (i == 0) {
                 column.setPreferredWidth(20);
@@ -126,6 +126,8 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
             } else if (i == 11) {
                 column.setPreferredWidth(225);
             } else if (i == 12) {
+                column.setPreferredWidth(100);
+            } else if (i == 13) {
                 column.setPreferredWidth(215);
             }
         }
@@ -466,16 +468,10 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
                     + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Stts Lanjut</b></td>"
                     + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Tanggal Pulang</b></td>"
                     + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>ID Encounter</b></td>"
-                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Keluhan/Subjek/Objek</b></td>"
-                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Asesmen/Clinical Impression</b></td>"
-                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Petugas/Dokter/Praktisi</b></td>"
-                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>No.KTP Praktisi</b></td>"
-                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Tanggal</b></td>"
-                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Jam</b></td>"
                     + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>ICD 10</b></td>"
                     + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Nama Penyakit</b></td>"
-                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>ID Condition</b></td>"
-                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>ID Clinicial Impression</b></td>"
+                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>Label Episode</b></td>"
+                    + "<td valign='middle' bgcolor='#FFFAFA' align='center'><b>ID Episode Of Care</b></td>"
                     + "</tr>"
             );
             for (i = 0; i < tabMode.getRowCount(); i++) {
@@ -494,12 +490,6 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
                         + "<td valign='top'>" + tbObat.getValueAt(i, 11).toString() + "</td>"
                         + "<td valign='top'>" + tbObat.getValueAt(i, 12).toString() + "</td>"
                         + "<td valign='top'>" + tbObat.getValueAt(i, 13).toString() + "</td>"
-                        + "<td valign='top'>" + tbObat.getValueAt(i, 14).toString() + "</td>"
-                        + "<td valign='top'>" + tbObat.getValueAt(i, 15).toString() + "</td>"
-                        + "<td valign='top'>" + tbObat.getValueAt(i, 16).toString() + "</td>"
-                        + "<td valign='top'>" + tbObat.getValueAt(i, 17).toString() + "</td>"
-                        + "<td valign='top'>" + tbObat.getValueAt(i, 18).toString() + "</td>"
-                        + "<td valign='top'>" + tbObat.getValueAt(i, 19).toString() + "</td>"
                         + "</tr>");
             }
             LoadHTML.setText(
@@ -525,7 +515,7 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
             );
             bg.close();
 
-            File f = new File("DataSatuSehatClinicalImpression.html");
+            File f = new File("DataSatuSehatEpisodeOfCare.html");
             BufferedWriter bw = new BufferedWriter(new FileWriter(f));
             bw.write(LoadHTML.getText().replaceAll("<head>", "<head>"
                     + "<link href=\"file2.css\" rel=\"stylesheet\" type=\"text/css\" />"
@@ -535,7 +525,7 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
                     + "<font size='4' face='Tahoma'>" + akses.getnamars() + "</font><br>"
                     + akses.getalamatrs() + ", " + akses.getkabupatenrs() + ", " + akses.getpropinsirs() + "<br>"
                     + akses.getkontakrs() + ", E-mail : " + akses.getemailrs() + "<br><br>"
-                    + "<font size='2' face='Tahoma'>DATA PENGIRIMAN SATU SEHAT CLINICAL IMPRESSION<br><br></font>"
+                    + "<font size='2' face='Tahoma'>DATA PENGIRIMAN SATU SEHAT EPISODE OF CARE<br><br></font>"
                     + "</td>"
                     + "</tr>"
                     + "</table>")
@@ -579,7 +569,14 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
 //            if(tbObat.getValueAt(i,0).toString().equals("true")&&(!tbObat.getValueAt(i,5).toString().equals(""))&&(!tbObat.getValueAt(i,11).toString().equals(""))&&(!tbObat.getValueAt(i,13).toString().equals(""))&&tbObat.getValueAt(i,16).toString().equals("")){
             if (tbObat.getValueAt(i, 0).toString().equals("true")) {
                 try {
-                    iddokter = cekViaSatuSehat.tampilIDParktisi(tbObat.getValueAt(i, 12).toString());
+                    String labelEpisode = tbObat.getValueAt(i, 12).toString();
+                    String episodeCode = "TB-SO";
+                    String episodeDisplay = "Tuberkulosis Sensitif Obat";
+                    if (labelEpisode.equals("ANC")) {
+                        episodeCode = "ANC";
+                        episodeDisplay = "Antenatal Care";
+                    }
+                    iddokter = "";
                     idpasien = cekViaSatuSehat.tampilIDPasien(tbObat.getValueAt(i, 5).toString());
                     try {
                         headers = new HttpHeaders();
@@ -607,8 +604,8 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
                                 + "            \"coding\": [\n"
                                 + "                {\n"
                                 + "                    \"system\": \"http://terminology.kemkes.go.id/CodeSystem/episodeofcare-type\",\n"
-                                + "                    \"code\": \"ANC\",\n"
-                                + "                    \"display\": \"Antenatal Care\"\n"
+                                + "                    \"code\": \"" + episodeCode + "\",\n"
+                                + "                    \"display\": \"" + episodeDisplay + "\"\n"
                                 + "                }\n"
                                 + "            ]\n"
                                 + "        }\n"
@@ -722,26 +719,36 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
         try {
             String queryRalan = "select reg_periksa.tgl_registrasi,reg_periksa.jam_reg,reg_periksa.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.no_ktp,"
                     + "reg_periksa.stts,reg_periksa.status_lanjut,concat(pemeriksaan_ralan.tgl_perawatan,'T',pemeriksaan_ralan.jam_rawat,'+07:00') as pulang,satu_sehat_encounter.id_encounter, "
-                    + "diagnosa_pasien.kd_penyakit,penyakit.nm_penyakit,ifnull(satu_sehat_episode_of_care.id_episode_of_care,'') as id_episode_of_care "
+                    + "diagnosa_pasien.kd_penyakit,penyakit.nm_penyakit,"
+                    + "case "
+                    + "when diagnosa_pasien.kd_penyakit like 'O%' then 'ANC' "
+                    + "when left(diagnosa_pasien.kd_penyakit,3) in ('A15','A16','A17','A18','A19') then 'TB-SO' "
+                    + "end as label_episode,"
+                    + "ifnull(satu_sehat_episode_of_care.id_episode_of_care,'') as id_episode_of_care "
                     + "from reg_periksa inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join pemeriksaan_ralan on pemeriksaan_ralan.no_rawat=reg_periksa.no_rawat "
                     + "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join diagnosa_pasien on diagnosa_pasien.no_rawat=reg_periksa.no_rawat "
                     + "inner join penyakit on diagnosa_pasien.kd_penyakit=penyakit.kd_penyakit left join satu_sehat_episode_of_care on satu_sehat_episode_of_care.no_rawat=diagnosa_pasien.no_rawat "
                     + "and satu_sehat_episode_of_care.kd_penyakit=diagnosa_pasien.kd_penyakit and satu_sehat_episode_of_care.status=diagnosa_pasien.status "
                     + "where pemeriksaan_ralan.tgl_perawatan between ? and ? "
-                    + "and diagnosa_pasien.kd_penyakit like '%O%' "
+                    + "and (diagnosa_pasien.kd_penyakit like 'O%' or left(diagnosa_pasien.kd_penyakit,3) in ('A15','A16','A17','A18','A19')) "
                     + (TCari.getText().equals("") ? "" : "and (reg_periksa.no_rawat like ? or reg_periksa.no_rkm_medis like ? or "
                     + "pasien.nm_pasien like ? or pasien.no_ktp like ? or diagnosa_pasien.kd_penyakit like ? or penyakit.nm_penyakit like ? or "
                     + "reg_periksa.stts like ? or reg_periksa.status_lanjut like ?)");
 
             String queryRanap = "select reg_periksa.tgl_registrasi,reg_periksa.jam_reg,reg_periksa.no_rawat,reg_periksa.no_rkm_medis,pasien.nm_pasien,pasien.no_ktp,"
                     + "reg_periksa.stts,reg_periksa.status_lanjut,concat(kamar_inap.tgl_keluar,'T',kamar_inap.jam_keluar,'+07:00') as pulang,satu_sehat_encounter.id_encounter, "
-                    + "diagnosa_pasien.kd_penyakit,penyakit.nm_penyakit,ifnull(satu_sehat_episode_of_care.id_episode_of_care,'') as id_episode_of_care "
+                    + "diagnosa_pasien.kd_penyakit,penyakit.nm_penyakit,"
+                    + "case "
+                    + "when diagnosa_pasien.kd_penyakit like 'O%' then 'ANC' "
+                    + "when left(diagnosa_pasien.kd_penyakit,3) in ('A15','A16','A17','A18','A19') then 'TB-SO' "
+                    + "end as label_episode,"
+                    + "ifnull(satu_sehat_episode_of_care.id_episode_of_care,'') as id_episode_of_care "
                     + "from reg_periksa inner join pasien on reg_periksa.no_rkm_medis=pasien.no_rkm_medis inner join kamar_inap on kamar_inap.no_rawat=reg_periksa.no_rawat "
                     + "inner join satu_sehat_encounter on satu_sehat_encounter.no_rawat=reg_periksa.no_rawat inner join diagnosa_pasien on diagnosa_pasien.no_rawat=reg_periksa.no_rawat "
                     + "inner join penyakit on diagnosa_pasien.kd_penyakit=penyakit.kd_penyakit left join satu_sehat_episode_of_care on satu_sehat_episode_of_care.no_rawat=diagnosa_pasien.no_rawat "
                     + "and satu_sehat_episode_of_care.kd_penyakit=diagnosa_pasien.kd_penyakit and satu_sehat_episode_of_care.status=diagnosa_pasien.status "
                     + "where kamar_inap.tgl_keluar between ? and ? "
-                    + "and diagnosa_pasien.kd_penyakit like '%O%' "
+                    + "and (diagnosa_pasien.kd_penyakit like 'O%' or left(diagnosa_pasien.kd_penyakit,3) in ('A15','A16','A17','A18','A19')) "
                     + (TCari.getText().equals("") ? "" : "and (reg_periksa.no_rawat like ? or reg_periksa.no_rkm_medis like ? or "
                     + "pasien.nm_pasien like ? or pasien.no_ktp like ? or diagnosa_pasien.kd_penyakit like ? or penyakit.nm_penyakit like ? or "
                     + "reg_periksa.stts like ? or reg_periksa.status_lanjut like ?)");
@@ -777,7 +784,7 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
                     tabMode.addRow(new Object[]{
                         false, rs.getString("tgl_registrasi") + " " + rs.getString("jam_reg"), rs.getString("no_rawat"), rs.getString("no_rkm_medis"), rs.getString("nm_pasien"),
                         rs.getString("no_ktp"), rs.getString("stts"), rs.getString("status_lanjut"), rs.getString("pulang"), rs.getString("id_encounter"), rs.getString("kd_penyakit"),
-                        rs.getString("nm_penyakit"), rs.getString("id_episode_of_care")
+                        rs.getString("nm_penyakit"), rs.getString("label_episode"), rs.getString("id_episode_of_care")
                     });
                 }
             } catch (Exception e) {
@@ -811,7 +818,7 @@ public final class SatuSehatKirimEpisodeOfCare extends javax.swing.JDialog {
                     tabMode.addRow(new Object[]{
                         false, rs.getString("tgl_registrasi") + " " + rs.getString("jam_reg"), rs.getString("no_rawat"), rs.getString("no_rkm_medis"), rs.getString("nm_pasien"),
                         rs.getString("no_ktp"), rs.getString("stts"), rs.getString("status_lanjut"), rs.getString("pulang"), rs.getString("id_encounter"), rs.getString("kd_penyakit"),
-                        rs.getString("nm_penyakit"), rs.getString("id_episode_of_care")
+                        rs.getString("nm_penyakit"), rs.getString("label_episode"), rs.getString("id_episode_of_care")
                     });
                 }
             } catch (Exception e) {
