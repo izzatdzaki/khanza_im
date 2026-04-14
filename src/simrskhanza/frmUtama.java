@@ -46419,7 +46419,7 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         
         btnReferensiPendaftaranMobileJKN = new widget.ButtonBig();
         btnReferensiPendaftaranMobileJKN.setIcon(new javax.swing.ImageIcon(getClass().getResource("/48x48/iconfinder_Hospital_5947112.png"))); 
-        btnReferensiPendaftaranMobileJKN.setText("Referensi Pendaftaran Mobile JKN");
+        btnReferensiPendaftaranMobileJKN.setText("Referensi Pendaftaran Mobile JKN FKTP");
         btnReferensiPendaftaranMobileJKN.setIconTextGap(0);
         btnReferensiPendaftaranMobileJKN.setName("btnReferensiPendaftaranMobileJKN"); 
         btnReferensiPendaftaranMobileJKN.setPreferredSize(new java.awt.Dimension(200, 90));

@@ -3776,8 +3776,8 @@ public class DlgUpdateUser extends javax.swing.JDialog {
             tabMode.addRow(new Object[]{false,"[L]Surat PRI VClaim",bpjs_surat_pri});
         }
 
-        if("[L]Referensi Pendaftaran Mobile JKN".toLowerCase().contains(TCari.getText().toLowerCase())){
-            tabMode.addRow(new Object[]{false,"[L]Referensi Pendaftaran Mobile JKN",referensi_mobilejkn_bpjs});
+        if("[L]Referensi Pendaftaran Mobile JKN FKTP".toLowerCase().contains(TCari.getText().toLowerCase())){
+            tabMode.addRow(new Object[]{false,"[L]Referensi Pendaftaran Mobile JKN FKTP",referensi_mobilejkn_bpjs});
         }
 
         if("[L]Batal Pendaftaran Mobile JKN".toLowerCase().contains(TCari.getText().toLowerCase())){
@@ -8539,7 +8539,7 @@ public class DlgUpdateUser extends javax.swing.JDialog {
                 Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","bpjs_surat_pri='"+tbUser.getValueAt(i,2).toString()+"'");
             }
             
-            if("[L]Referensi Pendaftaran Mobile JKN".equals(tbUser.getValueAt(i,1).toString())){
+            if("[L]Referensi Pendaftaran Mobile JKN FKTP".equals(tbUser.getValueAt(i,1).toString())){
                 Sequel.mengedit("user","id_user=AES_ENCRYPT('"+TKd.getText()+"','nur')","referensi_mobilejkn_bpjs='"+tbUser.getValueAt(i,2).toString()+"'");
             }
             

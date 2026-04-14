@@ -188,7 +188,7 @@ public class DlgUser extends javax.swing.JDialog {
                 "[A]Permintaan Rawat Inap","[L]Referensi Diagnosa PRB VClaim","[L]Referensi Obat PRB VClaim","[L]Surat Kontrol VClaim","[D]Penggunaan BHP OK/VK",
                 "[P]Surat Keterangan Rawat Inap","[P]Surat Keterangan Sehat","[K]Pendapatan Per Cara Bayar","[L]Host To Host Bank Jateng","[K]Pembayaran Bank Jateng",
                 "[L]Surat PRI VClaim","[I]Ringkasan Tindakan","[J]Lama Pelayanan Pasien","[P]Surat Keterangan Sakit Pihak 2","[K]Titip Faktur/Tagihan Obat & BHP",
-                "[L]Referensi Pendaftaran Mobile JKN","[L]Batal Pendaftaran Mobile JKN","[J]Lama Operasi","[O]Jumlah Inventaris Per Kategori","[O]Jumlah Inventaris Per Merk",
+                "[L]Referensi Pendaftaran Mobile JKN FKTP","[L]Batal Pendaftaran Mobile JKN","[J]Lama Operasi","[O]Jumlah Inventaris Per Kategori","[O]Jumlah Inventaris Per Merk",
                 "[O]Jumlah Inventaris Per Produsen","[K]Pengembalian Deposit Pasien","[K]Validasi Titip Faktur/Tagihan Obat & BHP","[K]Piutang Obat & BHP Belum Lunas",
                 "[L]Integrasi BRI API","[G]Pengadaan Aset/Inventaris","[K]Akun Jenis Aset/Inventaris","[G]Suplier Aset/Inventaris","[G]Penerimaan Aset/Inventaris",
                 "[K]Bayar Pesan Aset/Inventaris","[K]Hutang Aset/Inventaris","[G]Hibah Aset/Inventaris","[K]Titip Faktur/Tagihan Non Medis","[K]Validasi Titip Faktur/Tagihan Non Medis",

@@ -367,7 +367,7 @@ public final class DlgReg extends javax.swing.JDialog {
 
         tabMode=new DefaultTableModel(null,new Object[]{
             "P","No.Reg","No.Rawat","Tanggal","Jam","Kode Dokter","Dokter Dituju","Nomer RM",
-            "Pasien","J.K.","Umur","Poliklinik","Jenis Bayar","Penanggung Jawab","Alamat P.J.","Hubungan P.J.",
+            "Pasien","J.K.","Umur","Poliklinik","Jenis Bayar","Sumber","Penanggung Jawab","Alamat P.J.","Hubungan P.J.",
             "Biaya Regristrasi","Status","No.Telp","Stts Rawat","Stts Poli","Kode Poli","Kode PJ","Status Bayar"
         }){
              @Override public boolean isCellEditable(int rowIndex, int colIndex){
@@ -383,7 +383,8 @@ public final class DlgReg extends javax.swing.JDialog {
                  java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, 
                  java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, 
                  java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, 
-                 java.lang.Object.class,java.lang.Object.class,java.lang.Object.class,java.lang.Object.class
+                 java.lang.Object.class,java.lang.Object.class,java.lang.Object.class,java.lang.Object.class,
+                 java.lang.Object.class
              };
              @Override
              public Class getColumnClass(int columnIndex) {
@@ -395,7 +396,7 @@ public final class DlgReg extends javax.swing.JDialog {
         tbPetugas.setPreferredScrollableViewportSize(new Dimension(800,800));
         tbPetugas.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        for (i = 0; i < 24; i++) {
+        for (i = 0; i < 25; i++) {
             TableColumn column = tbPetugas.getColumnModel().getColumn(i);
             if(i==0){
                 column.setPreferredWidth(20);
@@ -424,28 +425,30 @@ public final class DlgReg extends javax.swing.JDialog {
             }else if(i==12){
                 column.setPreferredWidth(140);
             }else if(i==13){
-                column.setPreferredWidth(200);
-            }else if(i==14){
-                column.setPreferredWidth(140);
-            }else if(i==15){
                 column.setPreferredWidth(90);
+            }else if(i==14){
+                column.setPreferredWidth(200);
+            }else if(i==15){
+                column.setPreferredWidth(140);
             }else if(i==16){
-                column.setPreferredWidth(100);
+                column.setPreferredWidth(90);
             }else if(i==17){
-                column.setPreferredWidth(50);
+                column.setPreferredWidth(100);
             }else if(i==18){
-                column.setPreferredWidth(95);
-            }else if(i==19){
-                column.setPreferredWidth(75);
-            }else if(i==20){
                 column.setPreferredWidth(50);
+            }else if(i==19){
+                column.setPreferredWidth(95);
+            }else if(i==20){
+                column.setPreferredWidth(75);
             }else if(i==21){
-                column.setMinWidth(0);
-                column.setMaxWidth(0);
+                column.setPreferredWidth(50);
             }else if(i==22){
                 column.setMinWidth(0);
                 column.setMaxWidth(0);
             }else if(i==23){
+                column.setMinWidth(0);
+                column.setMaxWidth(0);
+            }else if(i==24){
                 column.setPreferredWidth(70);
             }
         }
@@ -8348,7 +8351,7 @@ private void MnKamarInapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             tbPetugas.requestFocus();
         }else{
             if(tbPetugas.getSelectedRow()!= -1){
-                if(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),19).toString().equals("Batal")){
+                if(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),20).toString().equals("Batal")){
                     JOptionPane.showMessageDialog(null,"Pasien berstatus batal periksa...!");
                 }else{
                     if(Sequel.cariRegistrasi(TNoRw.getText())>0){
@@ -8397,8 +8400,8 @@ private void MnRawatJalanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                     }
                     if (dlgrwjl == null) return;
                     if (!dlgrwjl.isVisible()) {
-                        dlgrwjl.SetPoli(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),21).toString());
-                        dlgrwjl.SetPj(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),22).toString());
+                        dlgrwjl.SetPoli(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),22).toString());
+                        dlgrwjl.SetPj(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),23).toString());
                         dlgrwjl.setNoRm(TNoRw.getText(),DTPCari1.getDate(),DTPCari2.getDate());   
                         dlgrwjl.isCek();
                     }
@@ -10215,7 +10218,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             Sequel.menyimpan("mutasi_berkas","'"+TNoRw.getText()+"','Sudah Diterima',now(),now(),'0000-00-00 00:00:00','0000-00-00 00:00:00','0000-00-00 00:00:00'","status='Sudah Diterima',diterima=now()","no_rawat='"+TNoRw.getText()+"'");
             Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"stts='Berkas Diterima'");
             if(tbPetugas.getSelectedRow()>-1){
-                tabMode.setValueAt("Berkas Diterima",tbPetugas.getSelectedRow(),19);
+                tabMode.setValueAt("Berkas Diterima",tbPetugas.getSelectedRow(),20);
             }
         }
     }//GEN-LAST:event_ppBerkasBtnPrintActionPerformed
@@ -10229,7 +10232,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             }else {
                 Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"stts='Sudah'");
                 if(tbPetugas.getSelectedRow()>-1){
-                    tabMode.setValueAt("Sudah",tbPetugas.getSelectedRow(),19);
+                    tabMode.setValueAt("Sudah",tbPetugas.getSelectedRow(),20);
                 }
             }
         }
@@ -10244,7 +10247,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             }else {
                 Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"stts='Belum'");
                 if(tbPetugas.getSelectedRow()>-1){
-                    tabMode.setValueAt("Belum",tbPetugas.getSelectedRow(),19);
+                    tabMode.setValueAt("Belum",tbPetugas.getSelectedRow(),20);
                 }
             }
 
@@ -10263,7 +10266,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                 }else{
                     Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"stts='Batal',biaya_reg='0'");
                     if(tbPetugas.getSelectedRow()>-1){
-                        tabMode.setValueAt("Batal",tbPetugas.getSelectedRow(),19);
+                        tabMode.setValueAt("Batal",tbPetugas.getSelectedRow(),20);
                     }
                 }
             }
@@ -10280,7 +10283,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                 Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"stts='Dirujuk'");
                 MnRujukActionPerformed(evt);
                 if(tbPetugas.getSelectedRow()>-1){
-                    tabMode.setValueAt("Dirujuk",tbPetugas.getSelectedRow(),19);
+                    tabMode.setValueAt("Dirujuk",tbPetugas.getSelectedRow(),20);
                 }
             }
 
@@ -10297,7 +10300,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                 Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"stts='Dirawat'");
                 MnKamarInapActionPerformed(evt);
                 if(tbPetugas.getSelectedRow()>-1){
-                    tabMode.setValueAt("Dirawat",tbPetugas.getSelectedRow(),19);
+                    tabMode.setValueAt("Dirawat",tbPetugas.getSelectedRow(),20);
                 }
             }
 
@@ -10320,7 +10323,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                 dlgPasienMati.isCek();
                 dlgPasienMati.setVisible(true);
                 if(tbPetugas.getSelectedRow()>-1){
-                    tabMode.setValueAt("Meninggal",tbPetugas.getSelectedRow(),19);
+                    tabMode.setValueAt("Meninggal",tbPetugas.getSelectedRow(),20);
                 }
             }
 
@@ -11222,7 +11225,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
         }else{            
             Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"status_poli='Baru'");
             if(tbPetugas.getSelectedRow()>-1){
-                tabMode.setValueAt("Baru",tbPetugas.getSelectedRow(),20);
+                tabMode.setValueAt("Baru",tbPetugas.getSelectedRow(),21);
             }
         }
     }//GEN-LAST:event_MnStatusBaruActionPerformed
@@ -11233,7 +11236,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
         }else{            
             Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"status_poli='Lama'");
             if(tbPetugas.getSelectedRow()>-1){
-                tabMode.setValueAt("Lama",tbPetugas.getSelectedRow(),20);
+                tabMode.setValueAt("Lama",tbPetugas.getSelectedRow(),21);
             }
         }
     }//GEN-LAST:event_MnStatusLamaActionPerformed
@@ -11407,7 +11410,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             }else {
                 Valid.editTable(tabMode,"reg_periksa","no_rawat",TNoRw,"stts='Pulang Paksa'");
                 if(tbPetugas.getSelectedRow()>-1){
-                    tabMode.setValueAt("Pulang Paksa",tbPetugas.getSelectedRow(),19);
+                    tabMode.setValueAt("Pulang Paksa",tbPetugas.getSelectedRow(),20);
                 }
             }
         }
@@ -12130,7 +12133,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                     form.isCek();
                     form.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
                     form.setLocationRelativeTo(internalFrame1);
-                    form.setNoRm(TNoRw.getText(),TNoRM.getText(),TPasien.getText(),TDokter.getText(),TPngJwb.getText(),TPoli.getText(),tbPetugas.getValueAt(tbPetugas.getSelectedRow(),18).toString());
+                    form.setNoRm(TNoRw.getText(),TNoRM.getText(),TPasien.getText(),TDokter.getText(),TPngJwb.getText(),TPoli.getText(),tbPetugas.getValueAt(tbPetugas.getSelectedRow(),19).toString());
                     form.setVisible(true);
                     this.setCursor(Cursor.getDefaultCursor());
                 }    
@@ -16767,9 +16770,9 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
                                     false,rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),
                                     rs.getString(5),rs.getString(6),rs.getString(7),rs.getString(8),
                                     rs.getString(9),rs.getString(10),rs.getString(11),rs.getString(17),
-                                    rs.getString(12),rs.getString(13),rs.getString(14),Valid.SetAngka(rs.getDouble(15)),
-                                    rs.getString(16),rs.getString("no_tlp"),rs.getString("stts"),rs.getString("status_poli"),
-                                    rs.getString("kd_poli"),rs.getString("kd_pj"),rs.getString("status_bayar")
+                                    sumberRegistrasi(rs.getString(2)),rs.getString(12),rs.getString(13),rs.getString(14),
+                                    Valid.SetAngka(rs.getDouble(15)),rs.getString(16),rs.getString("no_tlp"),rs.getString("stts"),
+                                    rs.getString("status_poli"),rs.getString("kd_poli"),rs.getString("kd_pj"),rs.getString("status_bayar")
                                 });
                             }   
                         }catch(Exception e){
@@ -16922,13 +16925,13 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             isCekPasien();
             TPoli.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),11).toString());          
             nmpnj.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),12).toString());
-            TPngJwb.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),13).toString());
-            TAlmt.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),14).toString());
-            THbngn.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),15).toString());
-            TBiaya.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),16).toString());
-            TStatus.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),17).toString());  
-            kdpoli.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),21).toString()); 
-            kdpnj.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),22).toString()); 
+            TPngJwb.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),14).toString());
+            TAlmt.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),15).toString());
+            THbngn.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),16).toString());
+            TBiaya.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),17).toString());
+            TStatus.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),18).toString());  
+            kdpoli.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),22).toString()); 
+            kdpnj.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),23).toString()); 
             Sequel.cariIsi("select rujuk_masuk.perujuk from rujuk_masuk where rujuk_masuk.no_rawat=?", AsalRujukan,tbPetugas.getValueAt(tbPetugas.getSelectedRow(),2).toString());
             TNoRw.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),2).toString());
             TNoReg.setText(tbPetugas.getValueAt(tbPetugas.getSelectedRow(),1).toString());    
@@ -17617,8 +17620,10 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             if(TabRawat.getSelectedIndex()==0){
                 tabMode.addRow(new Object[] {
                     false,TNoReg.getText(),TNoRw.getText(),Valid.SetTgl(DTPReg.getSelectedItem()+""),CmbJam.getSelectedItem()+":"+CmbMenit.getSelectedItem()+":"+CmbDetik.getSelectedItem(),
-                    KdDokter.getText(),TDokter.getText(),TNoRM.getText(),TPasien.getText(),JK.getText(),umur+" "+sttsumur,TPoli.getText(),nmpnj.getText(),TPngJwb.getText(),TAlmt.getText(),
-                    THbngn.getText(),Valid.SetAngka(Double.parseDouble(TBiaya.getText())),TStatus.getText(),NoTelp.getText(),"Belum",status,kdpoli.getText(),kdpnj.getText(),"Belum Bayar"
+                    KdDokter.getText(),TDokter.getText(),TNoRM.getText(),TPasien.getText(),JK.getText(),umur+" "+sttsumur,TPoli.getText(),nmpnj.getText(),
+                    sumberRegistrasi(TNoRw.getText()),TPngJwb.getText(),TAlmt.getText(),THbngn.getText(),
+                    Valid.SetAngka(Double.parseDouble(TBiaya.getText())),TStatus.getText(),NoTelp.getText(),"Belum",status,
+                    kdpoli.getText(),kdpnj.getText(),"Belum Bayar"
                 });
                 LCount.setText(""+tabMode.getRowCount());
             } 
@@ -17631,7 +17636,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
         if(tbPetugas.getSelectedRow()!= -1){
             jmlparsial=0;
             if(aktifkanparsial.equals("yes")){
-                jmlparsial=Sequel.cariInteger("select count(set_input_parsial.kd_pj) from set_input_parsial where set_input_parsial.kd_pj=?",tbPetugas.getValueAt(tbPetugas.getSelectedRow(),22).toString());
+                jmlparsial=Sequel.cariInteger("select count(set_input_parsial.kd_pj) from set_input_parsial where set_input_parsial.kd_pj=?",tbPetugas.getValueAt(tbPetugas.getSelectedRow(),23).toString());
             }
             if(jmlparsial>0){
                 DlgBilingParsialRalan parsialralan=new DlgBilingParsialRalan(null,false);
@@ -18996,15 +19001,21 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
             tabMode.setValueAt(umur+" "+sttsumur,tbPetugas.getSelectedRow(),10);
             tabMode.setValueAt(TPoli.getText(),tbPetugas.getSelectedRow(),11);
             tabMode.setValueAt(nmpnj.getText(),tbPetugas.getSelectedRow(),12);
-            tabMode.setValueAt(TPngJwb.getText(),tbPetugas.getSelectedRow(),13);
-            tabMode.setValueAt(TAlmt.getText(),tbPetugas.getSelectedRow(),14);
-            tabMode.setValueAt(THbngn.getText(),tbPetugas.getSelectedRow(),15);
-            tabMode.setValueAt(Valid.SetAngka(Double.parseDouble(TBiaya.getText())),tbPetugas.getSelectedRow(),16);
-            tabMode.setValueAt(TStatus.getText(),tbPetugas.getSelectedRow(),17);
-            tabMode.setValueAt(NoTelp.getText(),tbPetugas.getSelectedRow(),18);
-            tabMode.setValueAt(kdpoli.getText(),tbPetugas.getSelectedRow(),21);
-            tabMode.setValueAt(kdpnj.getText(),tbPetugas.getSelectedRow(),22);
+            tabMode.setValueAt(sumberRegistrasi(TNoRw.getText()),tbPetugas.getSelectedRow(),13);
+            tabMode.setValueAt(TPngJwb.getText(),tbPetugas.getSelectedRow(),14);
+            tabMode.setValueAt(TAlmt.getText(),tbPetugas.getSelectedRow(),15);
+            tabMode.setValueAt(THbngn.getText(),tbPetugas.getSelectedRow(),16);
+            tabMode.setValueAt(Valid.SetAngka(Double.parseDouble(TBiaya.getText())),tbPetugas.getSelectedRow(),17);
+            tabMode.setValueAt(TStatus.getText(),tbPetugas.getSelectedRow(),18);
+            tabMode.setValueAt(NoTelp.getText(),tbPetugas.getSelectedRow(),19);
+            tabMode.setValueAt(kdpoli.getText(),tbPetugas.getSelectedRow(),22);
+            tabMode.setValueAt(kdpnj.getText(),tbPetugas.getSelectedRow(),23);
             emptTeks();
         }
+    }
+
+    private String sumberRegistrasi(String noRawat) {
+        return Sequel.cariInteger("select count(no_rawat) from referensi_mobilejkn_fktp where no_rawat=?", noRawat) > 0
+                ? "Mobile JKN" : "Onsite";
     }
 }
