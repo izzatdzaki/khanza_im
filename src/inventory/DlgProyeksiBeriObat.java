@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import javax.swing.WindowConstants;
+import simrskhanza.DlgCariCaraBayar;
+import simrskhanza.DlgCariPoli;
 
 public class DlgProyeksiBeriObat extends javax.swing.JDialog {
     private final DefaultTableModel tabMode;
@@ -102,6 +104,8 @@ public class DlgProyeksiBeriObat extends javax.swing.JDialog {
     private void initComponents() {
 
         kdbar = new widget.TextBox();
+        kdpoli = new widget.TextBox();
+        kdpenjab = new widget.TextBox();
         internalFrame1 = new widget.InternalFrame();
         scrollPane1 = new widget.ScrollPane();
         tbDokter = new widget.Table();
@@ -115,6 +119,12 @@ public class DlgProyeksiBeriObat extends javax.swing.JDialog {
         btnBarang = new widget.Button();
         jLabel18 = new widget.Label();
         Status = new widget.ComboBox();
+        label12 = new widget.Label();
+        nmpoli = new widget.TextBox();
+        btnPoli = new widget.Button();
+        label13 = new widget.Label();
+        nmpenjab = new widget.TextBox();
+        btnPenjab = new widget.Button();
         panelisi1 = new widget.panelisi();
         label10 = new widget.Label();
         TCari = new widget.TextBox();
@@ -127,6 +137,12 @@ public class DlgProyeksiBeriObat extends javax.swing.JDialog {
 
         kdbar.setName("kdbar"); // NOI18N
         kdbar.setPreferredSize(new java.awt.Dimension(80, 23));
+
+        kdpoli.setName("kdpoli"); // NOI18N
+        kdpoli.setPreferredSize(new java.awt.Dimension(80, 23));
+
+        kdpenjab.setName("kdpenjab"); // NOI18N
+        kdpenjab.setPreferredSize(new java.awt.Dimension(80, 23));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setUndecorated(true);
@@ -161,7 +177,7 @@ public class DlgProyeksiBeriObat extends javax.swing.JDialog {
         internalFrame1.add(scrollPane1, java.awt.BorderLayout.CENTER);
 
         panelisi4.setName("panelisi4"); // NOI18N
-        panelisi4.setPreferredSize(new java.awt.Dimension(100, 44));
+        panelisi4.setPreferredSize(new java.awt.Dimension(100, 78));
         panelisi4.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 9));
 
         label11.setText("Tgl.Transaksi :");
@@ -217,6 +233,50 @@ public class DlgProyeksiBeriObat extends javax.swing.JDialog {
         Status.setName("Status"); // NOI18N
         Status.setPreferredSize(new java.awt.Dimension(90, 23));
         panelisi4.add(Status);
+
+        label12.setText("Poliklinik :");
+        label12.setName("label12"); // NOI18N
+        label12.setPreferredSize(new java.awt.Dimension(70, 23));
+        panelisi4.add(label12);
+
+        nmpoli.setEditable(false);
+        nmpoli.setName("nmpoli"); // NOI18N
+        nmpoli.setPreferredSize(new java.awt.Dimension(150, 23));
+        panelisi4.add(nmpoli);
+
+        btnPoli.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
+        btnPoli.setMnemonic('3');
+        btnPoli.setToolTipText("Alt+3");
+        btnPoli.setName("btnPoli"); // NOI18N
+        btnPoli.setPreferredSize(new java.awt.Dimension(28, 23));
+        btnPoli.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPoliActionPerformed(evt);
+            }
+        });
+        panelisi4.add(btnPoli);
+
+        label13.setText("Cara Bayar :");
+        label13.setName("label13"); // NOI18N
+        label13.setPreferredSize(new java.awt.Dimension(75, 23));
+        panelisi4.add(label13);
+
+        nmpenjab.setEditable(false);
+        nmpenjab.setName("nmpenjab"); // NOI18N
+        nmpenjab.setPreferredSize(new java.awt.Dimension(150, 23));
+        panelisi4.add(nmpenjab);
+
+        btnPenjab.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/190.png"))); // NOI18N
+        btnPenjab.setMnemonic('4');
+        btnPenjab.setToolTipText("Alt+4");
+        btnPenjab.setName("btnPenjab"); // NOI18N
+        btnPenjab.setPreferredSize(new java.awt.Dimension(28, 23));
+        btnPenjab.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPenjabActionPerformed(evt);
+            }
+        });
+        panelisi4.add(btnPenjab);
 
         internalFrame1.add(panelisi4, java.awt.BorderLayout.PAGE_START);
 
@@ -344,7 +404,8 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
             }
             
             say=" detail_pemberian_obat.tgl_perawatan between '"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"' "+
-                " and detail_pemberian_obat.status like '%"+Status.getSelectedItem().toString().replaceAll("Semua","")+"%' ";
+                " and detail_pemberian_obat.status like '%"+Status.getSelectedItem().toString().replaceAll("Semua","")+"%' "+
+                getFilterQuery();
             
             Map<String, Object> param = new HashMap<>();  
             param.put("namars",akses.getnamars());
@@ -360,10 +421,14 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
                         "(detail_pemberian_obat.embalase+detail_pemberian_obat.tuslah)as tambahan,detail_pemberian_obat.total,detail_pemberian_obat.h_beli,"+
                         "(detail_pemberian_obat.h_beli * detail_pemberian_obat.jml) as total_asal,(detail_pemberian_obat.total-(detail_pemberian_obat.h_beli * detail_pemberian_obat.jml)) as keuntungan "+
                         "from detail_pemberian_obat inner join databarang on detail_pemberian_obat.kode_brng=databarang.kode_brng "+
-                        "inner join kodesatuan on databarang.kode_sat=kodesatuan.kode_sat where "+say+bar+
+                        "inner join kodesatuan on databarang.kode_sat=kodesatuan.kode_sat "+
+                        "inner join reg_periksa on detail_pemberian_obat.no_rawat=reg_periksa.no_rawat "+
+                        "inner join penjab on reg_periksa.kd_pj=penjab.kd_pj "+
+                        "left join poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli where "+say+bar+
                         (TCari.getText().trim().equals("")?"":"and (detail_pemberian_obat.tgl_perawatan like '%"+TCari.getText().trim()+"%' or "+
                         "detail_pemberian_obat.no_rawat like '%"+TCari.getText().trim()+"%' or detail_pemberian_obat.kode_brng like '%"+TCari.getText().trim()+"%' or "+
-                        "databarang.nama_brng like '%"+TCari.getText().trim()+"%' or kodesatuan.satuan like '%"+TCari.getText().trim()+"%') ")+
+                        "databarang.nama_brng like '%"+TCari.getText().trim()+"%' or kodesatuan.satuan like '%"+TCari.getText().trim()+"%' or "+
+                        "ifnull(poliklinik.nm_poli,'') like '%"+TCari.getText().trim()+"%' or penjab.png_jawab like '%"+TCari.getText().trim()+"%') ")+
                         "order by detail_pemberian_obat.tgl_perawatan,detail_pemberian_obat.no_rawat",param);
         }
         this.setCursor(Cursor.getDefaultCursor());
@@ -449,10 +514,52 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
         barang.setVisible(true);
     }//GEN-LAST:event_btnBarangActionPerformed
 
+    private void btnPoliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPoliActionPerformed
+        DlgCariPoli poli = new DlgCariPoli(null,false);
+        poli.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(poli.getTable().getSelectedRow()!= -1){
+                    kdpoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),0).toString());
+                    nmpoli.setText(poli.getTable().getValueAt(poli.getTable().getSelectedRow(),1).toString());
+                }
+                btnPoli.requestFocus();
+            }
+        });
+        poli.isCek();
+        poli.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        poli.setLocationRelativeTo(internalFrame1);
+        poli.setAlwaysOnTop(false);
+        poli.setVisible(true);
+    }//GEN-LAST:event_btnPoliActionPerformed
+
+    private void btnPenjabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPenjabActionPerformed
+        DlgCariCaraBayar penjab = new DlgCariCaraBayar(null,false);
+        penjab.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if(penjab.getTable().getSelectedRow()!= -1){
+                    kdpenjab.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),1).toString());
+                    nmpenjab.setText(penjab.getTable().getValueAt(penjab.getTable().getSelectedRow(),2).toString());
+                }
+                btnPenjab.requestFocus();
+            }
+        });
+        penjab.isCek();
+        penjab.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+        penjab.setLocationRelativeTo(internalFrame1);
+        penjab.setAlwaysOnTop(false);
+        penjab.setVisible(true);
+    }//GEN-LAST:event_btnPenjabActionPerformed
+
     private void BtnAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAllActionPerformed
         TCari.setText("");
         kdbar.setText("");
         nmbar.setText("");
+        kdpoli.setText("");
+        nmpoli.setText("");
+        kdpenjab.setText("");
+        nmpenjab.setText("");
         runBackground(() ->prosesCari());
     }//GEN-LAST:event_BtnAllActionPerformed
 
@@ -517,15 +624,23 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
     private widget.Tanggal Tgl1;
     private widget.Tanggal Tgl2;
     private widget.Button btnBarang;
+    private widget.Button btnPenjab;
+    private widget.Button btnPoli;
     private widget.InternalFrame internalFrame1;
     private widget.Label jLabel18;
     private widget.TextBox kdbar;
+    private widget.TextBox kdpenjab;
+    private widget.TextBox kdpoli;
     private widget.Label label10;
     private widget.Label label11;
+    private widget.Label label12;
+    private widget.Label label13;
     private widget.Label label17;
     private widget.Label label18;
     private widget.Label label9;
     private widget.TextBox nmbar;
+    private widget.TextBox nmpenjab;
+    private widget.TextBox nmpoli;
     private widget.panelisi panelisi1;
     private widget.panelisi panelisi4;
     private widget.ScrollPane scrollPane1;
@@ -541,17 +656,22 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
             }
             
             say=" detail_pemberian_obat.tgl_perawatan between '"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"' "+
-                " and detail_pemberian_obat.status like '%"+Status.getSelectedItem().toString().replaceAll("Semua","")+"%' ";
+                " and detail_pemberian_obat.status like '%"+Status.getSelectedItem().toString().replaceAll("Semua","")+"%' "+
+                getFilterQuery();
             ps=koneksi.prepareStatement(
                         "select detail_pemberian_obat.tgl_perawatan,detail_pemberian_obat.no_rawat,detail_pemberian_obat.kode_brng,databarang.nama_brng, "+
                         "kodesatuan.satuan,detail_pemberian_obat.biaya_obat,detail_pemberian_obat.jml,(detail_pemberian_obat.biaya_obat*detail_pemberian_obat.jml) as subtotal,"+
                         "(detail_pemberian_obat.embalase+detail_pemberian_obat.tuslah)as tambahan,detail_pemberian_obat.total,detail_pemberian_obat.h_beli,"+
                         "(detail_pemberian_obat.h_beli * detail_pemberian_obat.jml) as total_asal,(detail_pemberian_obat.total-(detail_pemberian_obat.h_beli * detail_pemberian_obat.jml)) as keuntungan "+
                         "from detail_pemberian_obat inner join databarang on detail_pemberian_obat.kode_brng=databarang.kode_brng "+
-                        "inner join kodesatuan on databarang.kode_sat=kodesatuan.kode_sat where "+say+bar+
+                        "inner join kodesatuan on databarang.kode_sat=kodesatuan.kode_sat "+
+                        "inner join reg_periksa on detail_pemberian_obat.no_rawat=reg_periksa.no_rawat "+
+                        "inner join penjab on reg_periksa.kd_pj=penjab.kd_pj "+
+                        "left join poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli where "+say+bar+
                         (TCari.getText().trim().equals("")?"":"and (detail_pemberian_obat.tgl_perawatan like '%"+TCari.getText().trim()+"%' or "+
                         "detail_pemberian_obat.no_rawat like '%"+TCari.getText().trim()+"%' or detail_pemberian_obat.kode_brng like '%"+TCari.getText().trim()+"%' or "+
-                        "databarang.nama_brng like '%"+TCari.getText().trim()+"%' or kodesatuan.satuan like '%"+TCari.getText().trim()+"%') ")+
+                        "databarang.nama_brng like '%"+TCari.getText().trim()+"%' or kodesatuan.satuan like '%"+TCari.getText().trim()+"%' or "+
+                        "ifnull(poliklinik.nm_poli,'') like '%"+TCari.getText().trim()+"%' or penjab.png_jawab like '%"+TCari.getText().trim()+"%') ")+
                         "order by detail_pemberian_obat.tgl_perawatan,detail_pemberian_obat.no_rawat");
             try{
                 rs=ps.executeQuery();
@@ -582,6 +702,17 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
     
     public void isCek(){
          BtnPrint.setEnabled(akses.getkeuntungan_beri_obat());
+    }
+
+    private String getFilterQuery() {
+        StringBuilder filter = new StringBuilder();
+        if(!kdpoli.getText().trim().equals("")){
+            filter.append(" and reg_periksa.kd_poli='").append(kdpoli.getText().trim()).append("' ");
+        }
+        if(!kdpenjab.getText().trim().equals("")){
+            filter.append(" and reg_periksa.kd_pj='").append(kdpenjab.getText().trim()).append("' ");
+        }
+        return filter.toString();
     }
  
     private void runBackground(Runnable task) {
