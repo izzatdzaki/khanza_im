@@ -650,6 +650,14 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
     private void prosesCari() {
        Valid.tabelKosong(tabMode);      
        try{   
+            double totalBiayaObat = 0;
+            double totalJmlObat = 0;
+            double totalSubtotalBiaya = 0;
+            double totalTambahan = 0;
+            double totalBiaya = 0;
+            double totalHargaBeli = 0;
+            double totalBeli = 0;
+            double totalKeuntungan = 0;
             bar="";
             if(!nmbar.getText().equals("")){
                 bar=" and databarang.nama_brng='"+nmbar.getText()+"' ";
@@ -678,13 +686,28 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
                 total=0;
                 while(rs.next()){
                     total=total+rs.getDouble(13);
+                    totalBiayaObat = totalBiayaObat + rs.getDouble(6);
+                    totalJmlObat = totalJmlObat + rs.getDouble(7);
+                    totalSubtotalBiaya = totalSubtotalBiaya + rs.getDouble(8);
+                    totalTambahan = totalTambahan + rs.getDouble(9);
+                    totalBiaya = totalBiaya + rs.getDouble(10);
+                    totalHargaBeli = totalHargaBeli + rs.getDouble(11);
+                    totalBeli = totalBeli + rs.getDouble(12);
+                    totalKeuntungan = totalKeuntungan + rs.getDouble(13);
                     tabMode.addRow(new Object[]{
                         rs.getString(1),rs.getString(2),rs.getString(3)+", "+rs.getString(4),rs.getString(5),df2.format(rs.getDouble(6)),
                         df2.format(rs.getDouble(7)),df2.format(rs.getDouble(8)),df2.format(rs.getDouble(9)),df2.format(rs.getDouble(10)),
                         df2.format(rs.getDouble(11)),df2.format(rs.getDouble(12)),df2.format(rs.getDouble(13))
                     });  
-                }  
-                LTotal.setText(df2.format(total));  
+                }
+                if(tabMode.getRowCount()>0){
+                    tabMode.addRow(new Object[]{
+                        "", "", "TOTAL", "", df2.format(totalBiayaObat),
+                        df2.format(totalJmlObat), df2.format(totalSubtotalBiaya), df2.format(totalTambahan), df2.format(totalBiaya),
+                        df2.format(totalHargaBeli), df2.format(totalBeli), df2.format(totalKeuntungan)
+                    });
+                }
+                LTotal.setText(df2.format(totalKeuntungan));  
             }catch (Exception e) {
                  System.out.println("Notifikasi : "+e);
             } finally{

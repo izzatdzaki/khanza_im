@@ -816,6 +816,7 @@ import laporan.DlgKIPPasienRanap;
 import laporan.DlgKepatuhanKelengkapanKeselamatanBedah;
 import laporan.DlgKlasifikasiPasienPerBangsal;
 import laporan.DlgLamaPelayananPasien;
+import laporan.DlgLaporanKegiatanPelayanan;
 import laporan.DlgLaporanPenyakitPolri;
 import laporan.DlgLaporanPenyakitTNI;
 import laporan.DlgOperasiPerBulan;
@@ -17687,6 +17688,17 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         form.setVisible(true);
         this.setCursor(Cursor.getDefaultCursor());
     }  
+
+    private void btnLaporanKegiatanPelayananActionPerformed(java.awt.event.ActionEvent evt) {
+        isTutup();
+        DlgHome.dispose();
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        DlgLaporanKegiatanPelayanan form=new DlgLaporanKegiatanPelayanan(this,false);
+        form.setSize(PanelUtama.getWidth(), PanelUtama.getHeight());
+        form.setLocationRelativeTo(PanelUtama);
+        form.setVisible(true);
+        this.setCursor(Cursor.getDefaultCursor());
+    }
     
     private void btnReferensiPendaftaranMobileJKNActionPerformed(java.awt.event.ActionEvent evt) {
         isTutup();
@@ -24004,7 +24016,7 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
             btnRingkasanPenerimaanNonMedis,btnRingkasanStokKeluarNonMedis,btnRingkasanReturSuplierNonMedis,btnOmsetPenerimaan,btnValidasiPenagihanPiutang,
             btnPermintaanRanap,btnBPJSReferensiDiagnosaPRB,btnBPJSReferensiObatPRB,btnBPJSSuratKontrol,btnPenggunaanBHPOK,btnSuratKeteranganRawatInap,
             btnSuratKeteranganSehat,btnPendapatanPerCaraBayar,btnAkunRekeningHtHBankJateng,btnPembayaranBankJateng,btnBPJSSuratPRI,btnRingkasanTindakanRalan,
-            btnLamaPelayananPasien,btnSuratSakitPihak2,btnReferensiPendaftaranMobileJKN,btnBatalPendaftaranMobileJKN,btnTagihanHutangObat,btnLamaOperasi,
+            btnLamaPelayananPasien,btnLaporanKegiatanPelayanan,btnSuratSakitPihak2,btnReferensiPendaftaranMobileJKN,btnBatalPendaftaranMobileJKN,btnTagihanHutangObat,btnLamaOperasi,
             btnGrafikInventarisKategori,btnGrafikInventarisMerk,btnGrafikInventarisProdusen,btnPengembalianDepositPasien,btnValidasiTagihanObatBHP,
             btnPiutangObatBelumLunas,btnIntegrasiBRIApi,btnAkunAsetInventaris,btnPengadaanAset,btnSuplierInventaris,btnPenerimaanAset,
             btnBayarPemesananInventaris,btnHutangAsetInventaris,btnHibahAsetInventaris,btnTagihanHutangNonMedis,btnValidasiTagihanNonMedis,
@@ -26090,6 +26102,8 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
             
             if(akses.getlama_pelayanan_pasien()==true){  
                 Panelmenu.add(btnLamaPelayananPasien);                 
+                jmlmenu++;
+                Panelmenu.add(btnLaporanKegiatanPelayanan);                 
                 jmlmenu++;
             }
             
@@ -32006,6 +32020,8 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         
         if(akses.getlama_pelayanan_pasien()==true){  
             Panelmenu.add(btnLamaPelayananPasien);                 
+            jmlmenu++;
+            Panelmenu.add(btnLaporanKegiatanPelayanan);                 
             jmlmenu++;
         }
         
@@ -38659,7 +38675,11 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
             if(btnLamaPelayananPasien.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
                 Panelmenu.add(btnLamaPelayananPasien);                 
                 jmlmenu++;
-            }                
+            }
+            if(btnLaporanKegiatanPelayanan.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
+                Panelmenu.add(btnLaporanKegiatanPelayanan);                 
+                jmlmenu++;
+            }
         }
         
         if(akses.getlama_operasi()==true){  
@@ -46408,6 +46428,14 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         btnLamaPelayananPasien.setName("btnLamaPelayananPasien");
         btnLamaPelayananPasien.setPreferredSize(new java.awt.Dimension(200, 90));
         btnLamaPelayananPasien.addActionListener(this::btnLamaPelayananPasienActionPerformed);
+
+        btnLaporanKegiatanPelayanan = new widget.ButtonBig();
+        btnLaporanKegiatanPelayanan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/48x48/85334_file_open_icon.png"))); 
+        btnLaporanKegiatanPelayanan.setText("Laporan Kegiatan Pelayanan");
+        btnLaporanKegiatanPelayanan.setIconTextGap(0);
+        btnLaporanKegiatanPelayanan.setName("btnLaporanKegiatanPelayanan");
+        btnLaporanKegiatanPelayanan.setPreferredSize(new java.awt.Dimension(200, 90));
+        btnLaporanKegiatanPelayanan.addActionListener(this::btnLaporanKegiatanPelayananActionPerformed);
         
         btnSuratSakitPihak2 = new widget.ButtonBig();
         btnSuratSakitPihak2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/48x48/iconfinder_order-history_49596.png"))); 

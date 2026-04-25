@@ -31,6 +31,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -47,11 +48,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import keuangan.DlgCariPerawatanRalan;
@@ -69,6 +72,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import rekammedis.RMRiwayatPerawatan;
+import jxl.Workbook;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 
 
 /**
@@ -664,6 +670,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         jLabel12 = new widget.Label();
         TCari2 = new widget.TextBox();
         BtnCari2 = new widget.Button();
+        BtnExcelSpesialis = new widget.Button();
         jLabel13 = new widget.Label();
         LCountSpesialis = new widget.Label();
         internalFrame6 = new widget.InternalFrame();
@@ -2644,6 +2651,24 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
             }
         });
         panelGlass11.add(BtnCari2);
+
+        BtnExcelSpesialis.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/Export.png"))); // NOI18N
+        BtnExcelSpesialis.setMnemonic('E');
+        BtnExcelSpesialis.setText("Excel");
+        BtnExcelSpesialis.setToolTipText("Alt+E");
+        BtnExcelSpesialis.setName("BtnExcelSpesialis"); // NOI18N
+        BtnExcelSpesialis.setPreferredSize(new java.awt.Dimension(90, 23));
+        BtnExcelSpesialis.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BtnExcelSpesialisActionPerformed(evt);
+            }
+        });
+        BtnExcelSpesialis.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                BtnExcelSpesialisKeyPressed(evt);
+            }
+        });
+        panelGlass11.add(BtnExcelSpesialis);
 
         jLabel13.setText("Record :");
         jLabel13.setName("jLabel13"); // NOI18N
@@ -5809,6 +5834,18 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         runBackground(() ->tampil3());
     }//GEN-LAST:event_BtnCari2ActionPerformed
 
+    private void BtnExcelSpesialisActionPerformed(java.awt.event.ActionEvent evt) {
+        exportExcelRujukanSpesialis();
+    }
+
+    private void BtnExcelSpesialisKeyPressed(java.awt.event.KeyEvent evt) {
+        if(evt.getKeyCode()==KeyEvent.VK_SPACE){
+            BtnExcelSpesialisActionPerformed(null);
+        }else{
+            Valid.pindah(evt, BtnCari2, BtnAll);
+        }
+    }
+
     private void BtnCari2KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_BtnCari2KeyPressed
         if(evt.getKeyCode()==KeyEvent.VK_SPACE){
             BtnCari2ActionPerformed(null);
@@ -6105,6 +6142,7 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
     private widget.Button BtnDiagnosa2;
     private widget.Button BtnDiagnosa3;
     private widget.Button BtnEdit;
+    private widget.Button BtnExcelSpesialis;
     private widget.Button BtnHapus;
     private widget.Button BtnKeluar;
     private widget.Button BtnKesadaran;
@@ -9811,6 +9849,97 @@ public final class PCareDataPendaftaran extends javax.swing.JDialog {
         return statusantrean;
     }
     
+    private void exportExcelRujukanSpesialis() {
+        if(tabMode3.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, table rujukan spesialis masih kosong...!!!!");
+            TCari2.requestFocus();
+            return;
+        }
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Simpan Data Rujukan Spesialis Excel");
+        chooser.setSelectedFile(new File("DataRujukanSpesialisPCare_" +
+            Valid.SetTgl(DTPCari5.getSelectedItem() + "") + "_" +
+            Valid.SetTgl(DTPCari6.getSelectedItem() + "") + ".xls"));
+        chooser.setFileFilter(new FileNameExtensionFilter("Excel 97-2003 (*.xls)", "xls"));
+
+        if(chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION){
+            return;
+        }
+
+        File file = chooser.getSelectedFile();
+        if(!file.getName().toLowerCase().endsWith(".xls")){
+            file = new File(file.getAbsolutePath() + ".xls");
+        }
+        if(file.exists() && JOptionPane.showConfirmDialog(this,
+                "File sudah ada. Timpa file ini?",
+                "Konfirmasi", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION){
+            return;
+        }
+
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        WritableWorkbook workbook = null;
+        try {
+            workbook = Workbook.createWorkbook(file);
+            WritableSheet sheet = workbook.createSheet("Rujukan Spesialis", 0);
+            int row = 0;
+            String[] header = {
+                "Tanggal Pelayanan", "Nama Pasien", "No RM", "Nomor Kartu",
+                "Nomor Urut", "Tujuan Poli", "Tujuan Rujukan/RS"
+            };
+            int[] columnWidths = new int[header.length];
+
+            for(int col = 0; col < header.length; col++){
+                sheet.addCell(new jxl.write.Label(col, row, header[col]));
+                columnWidths[col] = Math.max(10, header[col].length() + 2);
+            }
+            row++;
+
+            for(int dataRow = 0; dataRow < tabMode3.getRowCount(); dataRow++){
+                String noRawat = nilaiTabel(tabMode3, dataRow, 0);
+                String[] data = {
+                    nilaiTabel(tabMode3, dataRow, 2),
+                    nilaiTabel(tabMode3, dataRow, 4),
+                    nilaiTabel(tabMode3, dataRow, 3),
+                    nilaiTabel(tabMode3, dataRow, 5),
+                    Sequel.cariIsi("select pcare_pendaftaran.noUrut from pcare_pendaftaran where pcare_pendaftaran.no_rawat=?", noRawat),
+                    nilaiTabel(tabMode3, dataRow, 34),
+                    nilaiTabel(tabMode3, dataRow, 32)
+                };
+
+                for(int col = 0; col < data.length; col++){
+                    sheet.addCell(new jxl.write.Label(col, row, data[col]));
+                    columnWidths[col] = Math.max(columnWidths[col], Math.min(40, data[col].length() + 2));
+                }
+                row++;
+            }
+
+            for(int col = 0; col < header.length; col++){
+                sheet.setColumnView(col, Math.min(40, columnWidths[col]));
+            }
+
+            workbook.write();
+            JOptionPane.showMessageDialog(rootPane, "File Excel berhasil dibuat:\n" + file.getAbsolutePath());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "Export Excel gagal: " + e.getMessage());
+            System.out.println("Notif : "+e);
+        } finally {
+            try {
+                if(workbook != null){
+                    workbook.close();
+                }
+            } catch (Exception e) {
+                System.out.println("Notif : "+e);
+            }
+            setCursor(Cursor.getDefaultCursor());
+        }
+    }
+
+    private String nilaiTabel(DefaultTableModel model, int row, int col) {
+        Object value = model.getValueAt(row, col);
+        return value == null ? "" : value.toString();
+    }
+
     private void runBackground(Runnable task) {
         if (ceksukses) return;
         if (executor.isShutdown() || executor.isTerminated()) return;

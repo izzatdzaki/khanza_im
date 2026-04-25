@@ -8,12 +8,23 @@
     <entry key="USER">3fsjwvKJn8IpzysMeNu3bA==</entry>
     <entry key="PAS">Y3bs0XkXuhWOYaRIMkdhag==</entry>
     <entry key="CARICEPAT">aktif</entry>
+    
+<!--    <entry key="HOST">JwQgH9fpxaZNxOQesQl2wg==</entry>
+    <entry key="DATABASE">4NF2aJ3+0EHiT5i3h5UBXQ==</entry>
+    <entry key="DATABASE">kA0A+Xor0kOoOHnsb4jHLw==</entry>
+    <entry key="DATABASE">7w9CTQMYXKRYcSBYbswrbg==</entry>
+    
+    <entry key="PORT">nioxtijcpDaKSUiUiP5FAg==</entry>
+    <entry key="USER">3fsjwvKJn8IpzysMeNu3bA==</entry>
+    <entry key="PAS">Hj8iTFbURUi2xoPJw75bfw==</entry>
+    <entry key="CARICEPAT">aktif</entry>-->
+    
     <entry key="HOSTHYBRIDWEB">jMN2XStVHX7PYVhf0/d4CQ==</entry>
     <entry key="USERHYBRIDWEB">nmXqCKzrz9i8GTZlq7JruQ==</entry>
     <entry key="PASHYBRIDWEB">AsJ/0/gCnYnD+gK4fw9uKA==</entry>
     <entry key="HYBRIDWEB">webapps</entry>
     <entry key="PORTWEB">80</entry>
-    <entry key="AKTIFKANWARNARALAN">no</entry>
+    <entry key="AKTIFKANWARNARALAN">yes</entry>
     <entry key="ANTRIAN">player</entry>
     <entry key="LOKETANTRIAN">1</entry>
     <entry key="ALARMAPOTEK">yes</entry>
