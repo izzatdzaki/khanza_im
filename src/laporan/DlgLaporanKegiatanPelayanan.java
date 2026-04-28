@@ -46,6 +46,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
     private final validasi Valid = new validasi();
     private final Connection koneksi = koneksiDB.condb();
     private final List<BarisLaporan> dataLaporan = new ArrayList<BarisLaporan>();
+    private final List<BarisPenjualan> dataPenjualan = new ArrayList<BarisPenjualan>();
     private StringBuilder htmlContent;
     private PreparedStatement ps;
     private ResultSet rs;
@@ -54,6 +55,12 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
     private double totalTindakanBpjs = 0;
     private double totalTindakanUmum = 0;
     private double totalHarga = 0;
+    private double totalBayarCash = 0;
+    private double totalBayarQris = 0;
+    private double totalOtcCash = 0;
+    private double totalOtcQris = 0;
+    private double totalMinumanCash = 0;
+    private double totalMinumanQris = 0;
     private double totalUsgBpjs = 0;
     private double totalUsgUmum = 0;
     private double totalObatBpjs = 0;
@@ -170,7 +177,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         panelFilterInput.add(labelShift);
 
         cmbShift.setModel(new DefaultComboBoxModel(new String[] {
-            "Semua Shift", "Shift 1 (08:00 - 15:00)", "Shift 2 (15:00 - 22:00)"
+            "Semua Shift", "Shift 1 (08-15)", "Shift 2 (15-22)"
         }));
         cmbShift.setPreferredSize(new Dimension(165, 23));
         panelFilterInput.add(cmbShift);
@@ -387,7 +394,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             protected void done() {
                 try {
                     terapkanSnapshot(get());
-                    labelInfo.setText("Data tampil: " + dataLaporan.size() + " baris");
+                    labelInfo.setText("Data tampil: " + dataLaporan.size() + " baris pelayanan, " + dataPenjualan.size() + " baris penjualan");
                 } catch (Exception e) {
                     labelInfo.setText("Gagal memuat data");
                     LoadHTML.setText("<html><body><center>Gagal memuat data : " + e.getMessage() + "</center></body></html>");
@@ -414,8 +421,8 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         String tanggalAkhirSql = inputFormat.format(akhir);
 
         htmlBuilder.append("<html><head></head><body>");
-        htmlBuilder.append("<table width='2300px' align='center' cellpadding='0' cellspacing='0'>");
-        htmlBuilder.append("<tr class='judul'><td colspan='17'>");
+        htmlBuilder.append("<table width='1900px' align='center' cellpadding='0' cellspacing='0'>");
+        htmlBuilder.append("<tr class='judul'><td colspan='20'>");
         htmlBuilder.append("<font size='4'>").append(akses.getnamars()).append("</font><br>");
         htmlBuilder.append(akses.getalamatrs()).append(", ").append(akses.getkabupatenrs()).append(", ").append(akses.getpropinsirs()).append("<br>");
         htmlBuilder.append(akses.getkontakrs()).append(", E-mail : ").append(akses.getemailrs()).append("<br><br>");
@@ -424,11 +431,12 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         htmlBuilder.append("<font size='2'>Dokter : ").append(escapeHtml(filter.namaDokter))
                 .append(" | Unit : ").append(escapeHtml(filter.namaUnit))
                 .append(" | Shift : ").append(escapeHtml(filter.namaShift))
+                .append(" | Jenis Bayar : UMUM")
                 .append(" | Keyword : ").append(filter.keyword.isEmpty() ? "-" : escapeHtml(filter.keyword)).append("</font>");
         htmlBuilder.append("</td></tr>");
         htmlBuilder.append("</table><br>");
 
-        htmlBuilder.append("<table width='2300px' border='0' align='center' cellpadding='0' cellspacing='0'>");
+        htmlBuilder.append("<table width='2440px' border='0' align='center' cellpadding='0' cellspacing='0'>");
         htmlBuilder.append("<tr class='head'>");
         htmlBuilder.append("<td rowspan='2' width='80'>Hari</td>");
         htmlBuilder.append("<td rowspan='2' width='95'>Tanggal</td>");
@@ -437,9 +445,9 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         htmlBuilder.append("<td colspan='2' width='120'>Jumlah Pasien</td>");
         htmlBuilder.append("<td colspan='2' width='110'>SKBS</td>");
         htmlBuilder.append("<td colspan='2' width='120'>Tindakan</td>");
-        htmlBuilder.append("<td rowspan='2' width='90'>Harga</td>");
         htmlBuilder.append("<td colspan='2' width='120'>USG</td>");
-        htmlBuilder.append("<td colspan='3' width='250'>Resep Harga Obat</td>");
+        htmlBuilder.append("<td rowspan='2' width='110'>Harga</td>");
+        htmlBuilder.append("<td colspan='2' width='220'>Pembayaran</td>");
         htmlBuilder.append("</tr>");
 
         htmlBuilder.append("<tr class='head2'>");
@@ -453,13 +461,13 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         htmlBuilder.append("<td width='60'>UMUM</td>");
         htmlBuilder.append("<td width='60'>BPJS</td>");
         htmlBuilder.append("<td width='60'>UMUM</td>");
-        htmlBuilder.append("<td width='80'>BPJS</td>");
-        htmlBuilder.append("<td width='80'>Poli Gigi Umum</td>");
-        htmlBuilder.append("<td width='90'>Poli Umum Umum</td>");
+        htmlBuilder.append("<td width='110'>Cash</td>");
+        htmlBuilder.append("<td width='110'>QRIS</td>");
         htmlBuilder.append("</tr>");
 
         int jumlahBaris = 0;
         List<BarisLaporan> rows = new ArrayList<BarisLaporan>();
+        List<BarisPenjualan> rowsPenjualan = new ArrayList<BarisPenjualan>();
         int totalPasienBpjsLokal = 0;
         int totalPasienUmumLokal = 0;
         double totalSkbsBpjsLokal = 0;
@@ -467,6 +475,12 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         double totalTindakanBpjsLokal = 0;
         double totalTindakanUmumLokal = 0;
         double totalHargaLokal = 0;
+        double totalBayarCashLokal = 0;
+        double totalBayarQrisLokal = 0;
+        double totalOtcCashLokal = 0;
+        double totalOtcQrisLokal = 0;
+        double totalMinumanCashLokal = 0;
+        double totalMinumanQrisLokal = 0;
         double totalUsgBpjsLokal = 0;
         double totalUsgUmumLokal = 0;
         double totalObatBpjsLokal = 0;
@@ -476,8 +490,13 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             String filterDokter = filter.kodeDokter.isEmpty() ? "" : "and rp.kd_dokter=? ";
             String filterPoli = filter.kodePoli.isEmpty() ? "" : "and rp.kd_poli=? ";
             String filterKeyword = filter.keyword.isEmpty() ? "" : "and (d.nm_dokter like ? or p.nm_poli like ? or rp.no_rawat like ? or rp.no_rkm_medis like ?) ";
-            String filterShift = filter.shiftAwal.isEmpty() ? "" : "and exists (select 1 from pemeriksaan_ralan prf where prf.no_rawat=rp.no_rawat and prf.jam_rawat>=? and prf.jam_rawat<?) ";
-            String filterShiftPeriksa = filter.shiftAwal.isEmpty() ? "" : "and pr.jam_rawat>=? and pr.jam_rawat<? ";
+            String filterShift = filter.shiftAwal.isEmpty() ? "" :
+                "and (exists (select 1 from pemeriksaan_ralan prf where prf.no_rawat=rp.no_rawat and prf.jam_rawat>=? and prf.jam_rawat<?) " +
+                "or (not exists (select 1 from pemeriksaan_ralan prf0 where prf0.no_rawat=rp.no_rawat) and rp.jam_reg>=? and rp.jam_reg<?)) ";
+            String filterShiftPeriksa = filter.shiftAwal.isEmpty() ? "" :
+                "and ((pr.jam_rawat>=? and pr.jam_rawat<?) or (pr.jam_rawat is null and rp.jam_reg>=? and rp.jam_reg<?)) ";
+            String filterJenisBayarUmum =
+                "and rp.kd_pj in (select pj.kd_pj from penjab pj where trim(upper(pj.png_jawab))='UMUM') ";
             String sql =
                 "select base.tgl_registrasi,base.nm_dokter,base.nm_poli,base.jml_pasien_bpjs,base.jml_pasien_umum," +
                 "ifnull(periksa.jam_mulai,'-') as jam_mulai," +
@@ -486,34 +505,36 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 "ifnull(trx.tindakan_bpjs,0) as tindakan_bpjs,ifnull(trx.tindakan_umum,0) as tindakan_umum," +
                 "ifnull(trx.harga_tindakan,0) as harga_tindakan," +
                 "ifnull(trx.usg_bpjs,0) as usg_bpjs,ifnull(trx.usg_umum,0) as usg_umum," +
+                "ifnull(pay.bayar_cash,0) as bayar_cash,ifnull(pay.bayar_qris,0) as bayar_qris," +
                 "ifnull(trx.obat_bpjs,0) as obat_bpjs,ifnull(trx.obat_gigi_umum,0) as obat_gigi_umum," +
                 "ifnull(trx.obat_poli_umum,0) as obat_poli_umum " +
                 "from (" +
                 "select rp.tgl_registrasi,rp.kd_dokter,d.nm_dokter,rp.kd_poli,p.nm_poli," +
                 "count(rp.no_rawat) as jml_kunjungan," +
-                "sum(case when rp.kd_pj='BPJ' and rp.status_bayar='Sudah Bayar' and rp.stts='Sudah' then 1 else 0 end) as jml_pasien_bpjs," +
-                "sum(case when rp.kd_pj='A09' and rp.status_bayar='Sudah Bayar' and rp.stts='Sudah' then 1 else 0 end) as jml_pasien_umum " +
+                "0 as jml_pasien_bpjs," +
+                "sum(case when rp.status_bayar='Sudah Bayar' and rp.stts='Sudah' then 1 else 0 end) as jml_pasien_umum " +
                 "from reg_periksa rp " +
                 "inner join dokter d on d.kd_dokter=rp.kd_dokter " +
                 "inner join poliklinik p on p.kd_poli=rp.kd_poli " +
                 "where rp.status_lanjut='Ralan' and rp.stts<>'Batal' and rp.tgl_registrasi between ? and ? " +
+                filterJenisBayarUmum +
                 filterDokter +
                 filterPoli +
                 filterKeyword +
                 filterShift +
                 "group by rp.tgl_registrasi,rp.kd_dokter,d.nm_dokter,rp.kd_poli,p.nm_poli " +
-                "having (sum(case when rp.kd_pj='BPJ' and rp.status_bayar='Sudah Bayar' and rp.stts='Sudah' then 1 else 0 end) + " +
-                "sum(case when rp.kd_pj='A09' and rp.status_bayar='Sudah Bayar' and rp.stts='Sudah' then 1 else 0 end)) > 0" +
+                "having sum(case when rp.status_bayar='Sudah Bayar' and rp.stts='Sudah' then 1 else 0 end) > 0" +
                 ") as base " +
                 "left join (" +
                 "select rp.tgl_registrasi,rp.kd_dokter,rp.kd_poli," +
-                "date_format(min(concat(pr.tgl_perawatan,' ',pr.jam_rawat)),'%H:%i') as jam_mulai," +
-                "date_format(max(concat(pr.tgl_perawatan,' ',pr.jam_rawat)),'%H:%i') as jam_selesai " +
+                "date_format(min(coalesce(pr.jam_rawat,rp.jam_reg)),'%H:%i') as jam_mulai," +
+                "date_format(max(coalesce(pr.jam_rawat,rp.jam_reg)),'%H:%i') as jam_selesai " +
                 "from reg_periksa rp " +
                 "inner join dokter d on d.kd_dokter=rp.kd_dokter " +
                 "inner join poliklinik p on p.kd_poli=rp.kd_poli " +
-                "inner join pemeriksaan_ralan pr on pr.no_rawat=rp.no_rawat " +
+                "left join pemeriksaan_ralan pr on pr.no_rawat=rp.no_rawat " +
                 "where rp.status_lanjut='Ralan' and rp.stts<>'Batal' and rp.tgl_registrasi between ? and ? " +
+                filterJenisBayarUmum +
                 filterDokter +
                 filterPoli +
                 filterKeyword +
@@ -522,16 +543,16 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 ") as periksa on periksa.tgl_registrasi=base.tgl_registrasi and periksa.kd_dokter=base.kd_dokter and periksa.kd_poli=base.kd_poli " +
                 "left join (" +
                 "select rp.tgl_registrasi,rp.kd_dokter,rp.kd_poli," +
-                "sum(case when rp.kd_pj='BPJ' and lower(ifnull(tag.nama_item,'')) like '%skbs%' then tag.qty else 0 end) as skbs_bpjs," +
-                "sum(case when rp.kd_pj='A09' and lower(ifnull(tag.nama_item,'')) like '%skbs%' then tag.qty else 0 end) as skbs_umum," +
-                "sum(case when rp.kd_pj='BPJ' and lower(ifnull(tag.nama_item,'')) like '%usg%' then tag.qty else 0 end) as usg_bpjs," +
-                "sum(case when rp.kd_pj='A09' and lower(ifnull(tag.nama_item,'')) like '%usg%' then tag.qty else 0 end) as usg_umum," +
-                "sum(case when rp.kd_pj='BPJ' and lower(ifnull(tag.nama_item,'')) not like '%skbs%' and lower(ifnull(tag.nama_item,'')) not like '%usg%' and lower(ifnull(tag.nama_item,'')) not like '%obat%' and lower(ifnull(tag.nama_item,'')) not like '%resep%' and lower(ifnull(tag.nama_item,'')) not like '%farmasi%' then tag.qty else 0 end) as tindakan_bpjs," +
-                "sum(case when rp.kd_pj='A09' and lower(ifnull(tag.nama_item,'')) not like '%skbs%' and lower(ifnull(tag.nama_item,'')) not like '%usg%' and lower(ifnull(tag.nama_item,'')) not like '%obat%' and lower(ifnull(tag.nama_item,'')) not like '%resep%' and lower(ifnull(tag.nama_item,'')) not like '%farmasi%' then tag.qty else 0 end) as tindakan_umum," +
-                "sum(case when lower(ifnull(tag.nama_item,'')) not like '%skbs%' and lower(ifnull(tag.nama_item,'')) not like '%usg%' and lower(ifnull(tag.nama_item,'')) not like '%obat%' and lower(ifnull(tag.nama_item,'')) not like '%resep%' and lower(ifnull(tag.nama_item,'')) not like '%farmasi%' then tag.nilai else 0 end) as harga_tindakan," +
-                "sum(case when rp.kd_pj='BPJ' and (tag.status_item='Obat' or lower(ifnull(tag.nama_item,'')) like '%obat%' or lower(ifnull(tag.nama_item,'')) like '%resep%' or lower(ifnull(tag.nama_item,'')) like '%farmasi%') then tag.nilai else 0 end) as obat_bpjs," +
-                "sum(case when rp.kd_pj='A09' and lower(p.nm_poli) like '%gigi%' and (tag.status_item='Obat' or lower(ifnull(tag.nama_item,'')) like '%obat%' or lower(ifnull(tag.nama_item,'')) like '%resep%' or lower(ifnull(tag.nama_item,'')) like '%farmasi%') then tag.nilai else 0 end) as obat_gigi_umum," +
-                "sum(case when rp.kd_pj='A09' and lower(p.nm_poli) like '%umum%' and (tag.status_item='Obat' or lower(ifnull(tag.nama_item,'')) like '%obat%' or lower(ifnull(tag.nama_item,'')) like '%resep%' or lower(ifnull(tag.nama_item,'')) like '%farmasi%') then tag.nilai else 0 end) as obat_poli_umum " +
+                "0 as skbs_bpjs," +
+                "sum(case when lower(ifnull(tag.nama_item,'')) like '%skbs%' then tag.qty else 0 end) as skbs_umum," +
+                "0 as usg_bpjs," +
+                "sum(case when lower(ifnull(tag.nama_item,'')) like '%usg%' then tag.qty else 0 end) as usg_umum," +
+                "0 as tindakan_bpjs," +
+                "sum(case when lower(ifnull(tag.nama_item,'')) not like '%skbs%' and lower(ifnull(tag.nama_item,'')) not like '%usg%' and lower(ifnull(tag.nama_item,'')) not like '%obat%' and lower(ifnull(tag.nama_item,'')) not like '%resep%' and lower(ifnull(tag.nama_item,'')) not like '%farmasi%' then tag.qty else 0 end) as tindakan_umum," +
+                "sum(tag.nilai) as harga_tindakan," +
+                "0 as obat_bpjs," +
+                "sum(case when lower(p.nm_poli) like '%gigi%' and (tag.status_item='Obat' or lower(ifnull(tag.nama_item,'')) like '%obat%' or lower(ifnull(tag.nama_item,'')) like '%resep%' or lower(ifnull(tag.nama_item,'')) like '%farmasi%') then tag.nilai else 0 end) as obat_gigi_umum," +
+                "sum(case when lower(p.nm_poli) like '%umum%' and (tag.status_item='Obat' or lower(ifnull(tag.nama_item,'')) like '%obat%' or lower(ifnull(tag.nama_item,'')) like '%resep%' or lower(ifnull(tag.nama_item,'')) like '%farmasi%') then tag.nilai else 0 end) as obat_poli_umum " +
                 "from reg_periksa rp " +
                 "inner join dokter d on d.kd_dokter=rp.kd_dokter " +
                 "inner join poliklinik p on p.kd_poli=rp.kd_poli " +
@@ -541,13 +562,30 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 "select tambahan_biaya.no_rawat,tambahan_biaya.nama_biaya as nama_item,'Tambahan' as status_item,1 as qty,tambahan_biaya.besar_biaya as nilai,'tambahan' as sumber from tambahan_biaya" +
                 ") as tag on tag.no_rawat=rp.no_rawat " +
                 "where rp.status_lanjut='Ralan' and rp.stts='Sudah' and rp.status_bayar='Sudah Bayar' and rp.tgl_registrasi between ? and ? " +
+                filterJenisBayarUmum +
                 filterDokter +
                 filterPoli +
                 filterKeyword +
                 filterShift +
                 "group by rp.tgl_registrasi,rp.kd_dokter,rp.kd_poli" +
                 ") as trx on trx.tgl_registrasi=base.tgl_registrasi and trx.kd_dokter=base.kd_dokter and trx.kd_poli=base.kd_poli " +
-                "group by base.tgl_registrasi,base.kd_dokter,base.nm_dokter,base.kd_poli,base.nm_poli,base.jml_pasien_bpjs,base.jml_pasien_umum,periksa.jam_mulai,periksa.jam_selesai,trx.skbs_bpjs,trx.skbs_umum,trx.tindakan_bpjs,trx.tindakan_umum,trx.harga_tindakan,trx.usg_bpjs,trx.usg_umum,trx.obat_bpjs,trx.obat_gigi_umum,trx.obat_poli_umum " +
+                "left join (" +
+                "select rp.tgl_registrasi,rp.kd_dokter,rp.kd_poli," +
+                "sum(case when dnj.nama_bayar='Bayar Cash' then dnj.besar_bayar else 0 end) as bayar_cash," +
+                "sum(case when dnj.nama_bayar='Pembayaran QRIS' then dnj.besar_bayar else 0 end) as bayar_qris " +
+                "from reg_periksa rp " +
+                "inner join dokter d on d.kd_dokter=rp.kd_dokter " +
+                "inner join poliklinik p on p.kd_poli=rp.kd_poli " +
+                "inner join detail_nota_jalan dnj on dnj.no_rawat=rp.no_rawat " +
+                "where rp.status_lanjut='Ralan' and rp.stts='Sudah' and rp.status_bayar='Sudah Bayar' and rp.tgl_registrasi between ? and ? " +
+                filterJenisBayarUmum +
+                filterDokter +
+                filterPoli +
+                filterKeyword +
+                filterShift +
+                "group by rp.tgl_registrasi,rp.kd_dokter,rp.kd_poli" +
+                ") as pay on pay.tgl_registrasi=base.tgl_registrasi and pay.kd_dokter=base.kd_dokter and pay.kd_poli=base.kd_poli " +
+                "group by base.tgl_registrasi,base.kd_dokter,base.nm_dokter,base.kd_poli,base.nm_poli,base.jml_pasien_bpjs,base.jml_pasien_umum,periksa.jam_mulai,periksa.jam_selesai,trx.skbs_bpjs,trx.skbs_umum,trx.tindakan_bpjs,trx.tindakan_umum,trx.harga_tindakan,trx.usg_bpjs,trx.usg_umum,pay.bayar_cash,pay.bayar_qris,trx.obat_bpjs,trx.obat_gigi_umum,trx.obat_poli_umum " +
                 "order by base.tgl_registrasi,base.nm_dokter,base.nm_poli";
             ps = koneksi.prepareStatement(sql);
             int pIndex = 1;
@@ -567,21 +605,6 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             if (!filter.shiftAwal.isEmpty()) {
                 ps.setString(pIndex++, filter.shiftAwal);
                 ps.setString(pIndex++, filter.shiftAkhir);
-            }
-            ps.setString(pIndex++, tanggalAwalSql);
-            ps.setString(pIndex++, tanggalAkhirSql);
-            if (!filter.kodeDokter.isEmpty()) {
-                ps.setString(pIndex++, filter.kodeDokter);
-            }
-            if (!filter.kodePoli.isEmpty()) {
-                ps.setString(pIndex++, filter.kodePoli);
-            }
-            if (!filter.keyword.isEmpty()) {
-                for (int i = 0; i < 4; i++) {
-                    ps.setString(pIndex++, "%" + filter.keyword + "%");
-                }
-            }
-            if (!filter.shiftAwal.isEmpty()) {
                 ps.setString(pIndex++, filter.shiftAwal);
                 ps.setString(pIndex++, filter.shiftAkhir);
             }
@@ -599,6 +622,46 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 }
             }
             if (!filter.shiftAwal.isEmpty()) {
+                ps.setString(pIndex++, filter.shiftAwal);
+                ps.setString(pIndex++, filter.shiftAkhir);
+                ps.setString(pIndex++, filter.shiftAwal);
+                ps.setString(pIndex++, filter.shiftAkhir);
+            }
+            ps.setString(pIndex++, tanggalAwalSql);
+            ps.setString(pIndex++, tanggalAkhirSql);
+            if (!filter.kodeDokter.isEmpty()) {
+                ps.setString(pIndex++, filter.kodeDokter);
+            }
+            if (!filter.kodePoli.isEmpty()) {
+                ps.setString(pIndex++, filter.kodePoli);
+            }
+            if (!filter.keyword.isEmpty()) {
+                for (int i = 0; i < 4; i++) {
+                    ps.setString(pIndex++, "%" + filter.keyword + "%");
+                }
+            }
+            if (!filter.shiftAwal.isEmpty()) {
+                ps.setString(pIndex++, filter.shiftAwal);
+                ps.setString(pIndex++, filter.shiftAkhir);
+                ps.setString(pIndex++, filter.shiftAwal);
+                ps.setString(pIndex++, filter.shiftAkhir);
+            }
+            ps.setString(pIndex++, tanggalAwalSql);
+            ps.setString(pIndex++, tanggalAkhirSql);
+            if (!filter.kodeDokter.isEmpty()) {
+                ps.setString(pIndex++, filter.kodeDokter);
+            }
+            if (!filter.kodePoli.isEmpty()) {
+                ps.setString(pIndex++, filter.kodePoli);
+            }
+            if (!filter.keyword.isEmpty()) {
+                for (int i = 0; i < 4; i++) {
+                    ps.setString(pIndex++, "%" + filter.keyword + "%");
+                }
+            }
+            if (!filter.shiftAwal.isEmpty()) {
+                ps.setString(pIndex++, filter.shiftAwal);
+                ps.setString(pIndex++, filter.shiftAkhir);
                 ps.setString(pIndex++, filter.shiftAwal);
                 ps.setString(pIndex++, filter.shiftAkhir);
             }
@@ -615,6 +678,8 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 double hargaTindakan = rs.getDouble("harga_tindakan");
                 double usgBpjs = rs.getDouble("usg_bpjs");
                 double usgUmum = rs.getDouble("usg_umum");
+                double bayarCash = rs.getDouble("bayar_cash");
+                double bayarQris = rs.getDouble("bayar_qris");
                 double obatBpjs = rs.getDouble("obat_bpjs");
                 double obatGigiUmum = rs.getDouble("obat_gigi_umum");
                 double obatPoliUmum = rs.getDouble("obat_poli_umum");
@@ -625,6 +690,8 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 totalTindakanBpjsLokal += tindakanBpjs;
                 totalTindakanUmumLokal += tindakanUmum;
                 totalHargaLokal += hargaTindakan;
+                totalBayarCashLokal += bayarCash;
+                totalBayarQrisLokal += bayarQris;
                 totalUsgBpjsLokal += usgBpjs;
                 totalUsgUmumLokal += usgUmum;
                 totalObatBpjsLokal += obatBpjs;
@@ -646,6 +713,12 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                     hargaTindakan,
                     usgBpjs,
                     usgUmum,
+                    bayarCash,
+                    bayarQris,
+                    0,
+                    0,
+                    0,
+                    0,
                     obatBpjs,
                     obatGigiUmum,
                     obatPoliUmum
@@ -662,16 +735,15 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 htmlBuilder.append("<td class='kanan'>").append(formatJumlah(skbsUmum)).append("</td>");
                 htmlBuilder.append("<td class='kanan'>").append(formatJumlah(tindakanBpjs)).append("</td>");
                 htmlBuilder.append("<td class='kanan'>").append(formatJumlah(tindakanUmum)).append("</td>");
-                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(hargaTindakan)).append("</td>");
                 htmlBuilder.append("<td class='kanan'>").append(formatJumlah(usgBpjs)).append("</td>");
                 htmlBuilder.append("<td class='kanan'>").append(formatJumlah(usgUmum)).append("</td>");
-                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(obatBpjs)).append("</td>");
-                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(obatGigiUmum)).append("</td>");
-                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(obatPoliUmum)).append("</td>");
+                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(hargaTindakan)).append("</td>");
+                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(bayarCash)).append("</td>");
+                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(bayarQris)).append("</td>");
                 htmlBuilder.append("</tr>");
             }
         } catch (Exception e) {
-            htmlBuilder.append("<tr class='isi'><td colspan='17' align='center'>Gagal menampilkan data : ").append(escapeHtml(e.getMessage())).append("</td></tr>");
+            htmlBuilder.append("<tr class='isi'><td colspan='16' align='center'>Gagal menampilkan data : ").append(escapeHtml(e.getMessage())).append("</td></tr>");
             System.out.println("Notifikasi : " + e);
         } finally {
             try {
@@ -686,8 +758,69 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             }
         }
 
+        PreparedStatement psPenjualan = null;
+        ResultSet rsPenjualan = null;
+        try {
+            String filterShiftPenjualan = filter.shiftAwal.isEmpty() ? "" :
+                "and jp.jam_jual>=? and jp.jam_jual<? ";
+            String sqlPenjualan =
+                "select penjualan.tgl_jual," +
+                "sum(case when penjualan.nip='IM-10' and penjualan.nama_bayar='Bayar Cash' then detailjual.total else 0 end) as penjualan_otc_cash," +
+                "sum(case when penjualan.nip='IM-10' and penjualan.nama_bayar='Pembayaran QRIS' then detailjual.total else 0 end) as penjualan_otc_qris," +
+                "sum(case when (penjualan.nip<>'IM-10' or penjualan.nip is null) and penjualan.nama_bayar='Bayar Cash' then detailjual.total else 0 end) as penjualan_minuman_cash," +
+                "sum(case when (penjualan.nip<>'IM-10' or penjualan.nip is null) and penjualan.nama_bayar='Pembayaran QRIS' then detailjual.total else 0 end) as penjualan_minuman_qris " +
+                "from penjualan " +
+                "left join jam_penjualan jp on jp.nota_jual=penjualan.nota_jual " +
+                "inner join detailjual on detailjual.nota_jual=penjualan.nota_jual " +
+                "where penjualan.status='Sudah Dibayar' and penjualan.tgl_jual between ? and ? " +
+                filterShiftPenjualan +
+                "group by penjualan.tgl_jual " +
+                "order by penjualan.tgl_jual";
+            psPenjualan = koneksi.prepareStatement(sqlPenjualan);
+            int pIndexPenjualan = 1;
+            psPenjualan.setString(pIndexPenjualan++, tanggalAwalSql);
+            psPenjualan.setString(pIndexPenjualan++, tanggalAkhirSql);
+            if (!filter.shiftAwal.isEmpty()) {
+                psPenjualan.setString(pIndexPenjualan++, filter.shiftAwal);
+                psPenjualan.setString(pIndexPenjualan++, filter.shiftAkhir);
+            }
+            rsPenjualan = psPenjualan.executeQuery();
+            while (rsPenjualan.next()) {
+                LocalDate tanggalJual = rsPenjualan.getDate("tgl_jual").toLocalDate();
+                double penjualanOtcCash = rsPenjualan.getDouble("penjualan_otc_cash");
+                double penjualanOtcQris = rsPenjualan.getDouble("penjualan_otc_qris");
+                double penjualanMinumanCash = rsPenjualan.getDouble("penjualan_minuman_cash");
+                double penjualanMinumanQris = rsPenjualan.getDouble("penjualan_minuman_qris");
+                totalOtcCashLokal += penjualanOtcCash;
+                totalOtcQrisLokal += penjualanOtcQris;
+                totalMinumanCashLokal += penjualanMinumanCash;
+                totalMinumanQrisLokal += penjualanMinumanQris;
+                rowsPenjualan.add(new BarisPenjualan(
+                    namaHari(tanggalJual.getDayOfWeek()),
+                    tampilFormat.format(tanggalJual),
+                    penjualanOtcCash,
+                    penjualanOtcQris,
+                    penjualanMinumanCash,
+                    penjualanMinumanQris
+                ));
+            }
+        } catch (Exception e) {
+            System.out.println("Notifikasi : " + e);
+        } finally {
+            try {
+                if (rsPenjualan != null) {
+                    rsPenjualan.close();
+                }
+                if (psPenjualan != null) {
+                    psPenjualan.close();
+                }
+            } catch (Exception e) {
+                System.out.println("Notifikasi : " + e);
+            }
+        }
+
         if (jumlahBaris == 0) {
-            htmlBuilder.append("<tr class='isi'><td colspan='17' align='center'>Tidak ada data pelayanan yang sesuai dengan filter.</td></tr>");
+            htmlBuilder.append("<tr class='isi'><td colspan='16' align='center'>Tidak ada data pelayanan yang sesuai dengan filter.</td></tr>");
         }
 
         htmlBuilder.append("<tr class='head2'>");
@@ -698,22 +831,57 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         htmlBuilder.append("<td class='kanan'>").append(formatJumlah(totalSkbsUmumLokal)).append("</td>");
         htmlBuilder.append("<td class='kanan'>").append(formatJumlah(totalTindakanBpjsLokal)).append("</td>");
         htmlBuilder.append("<td class='kanan'>").append(formatJumlah(totalTindakanUmumLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalHargaLokal)).append("</td>");
         htmlBuilder.append("<td class='kanan'>").append(formatJumlah(totalUsgBpjsLokal)).append("</td>");
         htmlBuilder.append("<td class='kanan'>").append(formatJumlah(totalUsgUmumLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalObatBpjsLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalObatGigiUmumLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalObatPoliUmumLokal)).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalHargaLokal)).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalBayarCashLokal)).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalBayarQrisLokal)).append("</td>");
         htmlBuilder.append("</tr>");
 
         htmlBuilder.append("</table>");
+        htmlBuilder.append("<br>");
+        htmlBuilder.append("<table width='950px' border='0' align='center' cellpadding='0' cellspacing='0'>");
+        htmlBuilder.append("<tr class='judul'><td colspan='6'>Rekap Penjualan OTC dan Minuman</td></tr>");
+        htmlBuilder.append("<tr class='head'>");
+        htmlBuilder.append("<td width='100'>Hari</td>");
+        htmlBuilder.append("<td width='110'>Tanggal</td>");
+        htmlBuilder.append("<td width='180'>OTC Cash</td>");
+        htmlBuilder.append("<td width='180'>OTC QRIS</td>");
+        htmlBuilder.append("<td width='180'>Minuman Cash</td>");
+        htmlBuilder.append("<td width='180'>Minuman QRIS</td>");
+        htmlBuilder.append("</tr>");
+        if (rowsPenjualan.isEmpty()) {
+            htmlBuilder.append("<tr class='isi'><td colspan='6' align='center'>Tidak ada data penjualan yang sesuai dengan periode.</td></tr>");
+        } else {
+            for (BarisPenjualan item : rowsPenjualan) {
+                htmlBuilder.append("<tr class='isi'>");
+                htmlBuilder.append("<td class='tengah'>").append(item.hari).append("</td>");
+                htmlBuilder.append("<td class='tengah'>").append(item.tanggal).append("</td>");
+                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(item.otcCash)).append("</td>");
+                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(item.otcQris)).append("</td>");
+                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(item.minumanCash)).append("</td>");
+                htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(item.minumanQris)).append("</td>");
+                htmlBuilder.append("</tr>");
+            }
+        }
+        htmlBuilder.append("<tr class='head2'>");
+        htmlBuilder.append("<td colspan='2' align='right'>Total Penjualan</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalOtcCashLokal)).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalOtcQrisLokal)).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalMinumanCashLokal)).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalMinumanQrisLokal)).append("</td>");
+        htmlBuilder.append("</tr>");
+        htmlBuilder.append("</table>");
         htmlBuilder.append("</body></html>");
         return new ReportSnapshot(
-            htmlBuilder.toString(), rows,
+            htmlBuilder.toString(), rows, rowsPenjualan,
             totalPasienBpjsLokal, totalPasienUmumLokal,
             totalSkbsBpjsLokal, totalSkbsUmumLokal,
             totalTindakanBpjsLokal, totalTindakanUmumLokal,
-            totalHargaLokal, totalUsgBpjsLokal, totalUsgUmumLokal,
+            totalHargaLokal, totalBayarCashLokal, totalBayarQrisLokal,
+            totalOtcCashLokal, totalOtcQrisLokal,
+            totalMinumanCashLokal, totalMinumanQrisLokal,
+            totalUsgBpjsLokal, totalUsgUmumLokal,
             totalObatBpjsLokal, totalObatGigiUmumLokal, totalObatPoliUmumLokal
         );
     }
@@ -732,7 +900,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         loadPilihan(
             cmbUnit,
             "Semua Unit",
-            "select kd_poli,nm_poli from poliklinik order by nm_poli",
+            "select kd_poli,nm_poli from poliklinik where status='1' order by nm_poli",
             "kd_poli",
             "nm_poli"
         );
@@ -747,7 +915,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             psLocal = koneksi.prepareStatement(sql);
             rsLocal = psLocal.executeQuery();
             while (rsLocal.next()) {
-                model.addElement(rsLocal.getString(kolomKode) + " - " + rsLocal.getString(kolomNama));
+                model.addElement(formatLabelPilihan(combo, rsLocal.getString(kolomKode), rsLocal.getString(kolomNama)));
             }
         } catch (Exception e) {
             System.out.println("Notifikasi : " + e);
@@ -764,6 +932,14 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             }
         }
         combo.setModel(model);
+    }
+
+    private String formatLabelPilihan(JComboBox combo, String kode, String nama) {
+        if (combo == cmbUnit && "UMUM".equalsIgnoreCase(nama)
+                && ("UMU".equalsIgnoreCase(kode) || "U0032".equalsIgnoreCase(kode))) {
+            return kode + " - " + nama + " (legacy)";
+        }
+        return kode + " - " + nama;
     }
 
     private String namaHari(DayOfWeek dayOfWeek) {
@@ -791,6 +967,14 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             return "";
         }
         return pilihan.substring(0, pilihan.indexOf(" - ")).trim();
+    }
+
+    private String getKodeUnitPilihan() {
+        String kode = getKodePilihan(cmbUnit, "Semua Unit");
+        if ("UMU".equalsIgnoreCase(kode) || "U0032".equalsIgnoreCase(kode)) {
+            return "UMUM";
+        }
+        return kode;
     }
 
     private String formatJumlah(double nilai) {
@@ -836,7 +1020,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             Valid.SetTgl(Tgl1.getSelectedItem() + ""),
             Valid.SetTgl(Tgl2.getSelectedItem() + ""),
             getKodePilihan(cmbDokter, "Semua Dokter"),
-            getKodePilihan(cmbUnit, "Semua Unit"),
+            getKodeUnitPilihan(),
             cmbDokter.getSelectedItem() == null ? "Semua Dokter" : cmbDokter.getSelectedItem().toString(),
             cmbUnit.getSelectedItem() == null ? "Semua Unit" : cmbUnit.getSelectedItem().toString(),
             getNamaShift(),
@@ -850,6 +1034,8 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         htmlContent = new StringBuilder(snapshot.html);
         dataLaporan.clear();
         dataLaporan.addAll(snapshot.rows);
+        dataPenjualan.clear();
+        dataPenjualan.addAll(snapshot.rowsPenjualan);
         totalPasienBpjs = snapshot.totalPasienBpjs;
         totalPasienUmum = snapshot.totalPasienUmum;
         totalSkbsBpjs = snapshot.totalSkbsBpjs;
@@ -857,6 +1043,12 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         totalTindakanBpjs = snapshot.totalTindakanBpjs;
         totalTindakanUmum = snapshot.totalTindakanUmum;
         totalHarga = snapshot.totalHarga;
+        totalBayarCash = snapshot.totalBayarCash;
+        totalBayarQris = snapshot.totalBayarQris;
+        totalOtcCash = snapshot.totalOtcCash;
+        totalOtcQris = snapshot.totalOtcQris;
+        totalMinumanCash = snapshot.totalMinumanCash;
+        totalMinumanQris = snapshot.totalMinumanQris;
         totalUsgBpjs = snapshot.totalUsgBpjs;
         totalUsgUmum = snapshot.totalUsgUmum;
         totalObatBpjs = snapshot.totalObatBpjs;
@@ -872,12 +1064,12 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         labelInfo.setText(pesan);
         btnTampilkan.setEnabled(!loading);
         btnPeriodeBulan.setEnabled(!loading);
-        BtnExport.setEnabled(!loading && !dataLaporan.isEmpty());
+        BtnExport.setEnabled(!loading && (!dataLaporan.isEmpty() || !dataPenjualan.isEmpty()));
         BtnPrint.setEnabled(!loading);
     }
 
     private void exportKeExcel() {
-        if (dataLaporan.isEmpty()) {
+        if (dataLaporan.isEmpty() && dataPenjualan.isEmpty()) {
             JOptionPane.showMessageDialog(rootPane, "Data laporan belum tersedia untuk diexport.");
             return;
         }
@@ -913,14 +1105,15 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             sheet.addCell(new jxl.write.Label(0, row++, "Dokter: " + cmbDokter.getSelectedItem() +
                 " | Unit: " + cmbUnit.getSelectedItem() +
                 " | Shift: " + cmbShift.getSelectedItem() +
+                " | Jenis Bayar: UMUM" +
                 " | Keyword: " + (TCari.getText().trim().isEmpty() ? "-" : TCari.getText().trim())));
             row++;
 
             String[] header = {
                 "Hari", "Tanggal", "Nama Dokter", "Unit", "Jam Mulai", "Jam Selesai",
                 "Pasien BPJS", "Pasien Umum", "SKBS BPJS", "SKBS Umum",
-                "Tindakan BPJS", "Tindakan Umum", "Harga",
-                "USG BPJS", "USG Umum", "Obat BPJS", "Obat Poli Gigi Umum", "Obat Poli Umum Umum"
+                "Tindakan BPJS", "Tindakan Umum", "USG BPJS", "USG Umum", "Harga",
+                "Bayar Cash", "Bayar QRIS"
             };
 
             for (int i = 0; i < header.length; i++) {
@@ -941,12 +1134,11 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 sheet.addCell(new jxl.write.Number(9, row, item.skbsUmum));
                 sheet.addCell(new jxl.write.Number(10, row, item.tindakanBpjs));
                 sheet.addCell(new jxl.write.Number(11, row, item.tindakanUmum));
-                sheet.addCell(new jxl.write.Number(12, row, item.hargaTindakan));
-                sheet.addCell(new jxl.write.Number(13, row, item.usgBpjs));
-                sheet.addCell(new jxl.write.Number(14, row, item.usgUmum));
-                sheet.addCell(new jxl.write.Number(15, row, item.obatBpjs));
-                sheet.addCell(new jxl.write.Number(16, row, item.obatGigiUmum));
-                sheet.addCell(new jxl.write.Number(17, row, item.obatPoliUmum));
+                sheet.addCell(new jxl.write.Number(12, row, item.usgBpjs));
+                sheet.addCell(new jxl.write.Number(13, row, item.usgUmum));
+                sheet.addCell(new jxl.write.Number(14, row, item.hargaTindakan));
+                sheet.addCell(new jxl.write.Number(15, row, item.bayarCash));
+                sheet.addCell(new jxl.write.Number(16, row, item.bayarQris));
                 row++;
             }
 
@@ -957,18 +1149,43 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             sheet.addCell(new jxl.write.Number(9, row, totalSkbsUmum));
             sheet.addCell(new jxl.write.Number(10, row, totalTindakanBpjs));
             sheet.addCell(new jxl.write.Number(11, row, totalTindakanUmum));
-            sheet.addCell(new jxl.write.Number(12, row, totalHarga));
-            sheet.addCell(new jxl.write.Number(13, row, totalUsgBpjs));
-            sheet.addCell(new jxl.write.Number(14, row, totalUsgUmum));
-            sheet.addCell(new jxl.write.Number(15, row, totalObatBpjs));
-            sheet.addCell(new jxl.write.Number(16, row, totalObatGigiUmum));
-            sheet.addCell(new jxl.write.Number(17, row, totalObatPoliUmum));
+            sheet.addCell(new jxl.write.Number(12, row, totalUsgBpjs));
+            sheet.addCell(new jxl.write.Number(13, row, totalUsgUmum));
+            sheet.addCell(new jxl.write.Number(14, row, totalHarga));
+            sheet.addCell(new jxl.write.Number(15, row, totalBayarCash));
+            sheet.addCell(new jxl.write.Number(16, row, totalBayarQris));
+            row += 2;
+
+            sheet.addCell(new jxl.write.Label(0, row++, "Rekap Penjualan OTC dan Minuman"));
+            String[] headerPenjualan = {"Hari", "Tanggal", "OTC Cash", "OTC QRIS", "Minuman Cash", "Minuman QRIS"};
+            for (int i = 0; i < headerPenjualan.length; i++) {
+                sheet.addCell(new jxl.write.Label(i, row, headerPenjualan[i]));
+            }
+            row++;
+
+            for (BarisPenjualan item : dataPenjualan) {
+                sheet.addCell(new jxl.write.Label(0, row, item.hari));
+                sheet.addCell(new jxl.write.Label(1, row, item.tanggal));
+                sheet.addCell(new jxl.write.Number(2, row, item.otcCash));
+                sheet.addCell(new jxl.write.Number(3, row, item.otcQris));
+                sheet.addCell(new jxl.write.Number(4, row, item.minumanCash));
+                sheet.addCell(new jxl.write.Number(5, row, item.minumanQris));
+                row++;
+            }
+            sheet.addCell(new jxl.write.Label(0, row, "Total Penjualan"));
+            sheet.addCell(new jxl.write.Number(2, row, totalOtcCash));
+            sheet.addCell(new jxl.write.Number(3, row, totalOtcQris));
+            sheet.addCell(new jxl.write.Number(4, row, totalMinumanCash));
+            sheet.addCell(new jxl.write.Number(5, row, totalMinumanQris));
 
             for (int i = 0; i < header.length; i++) {
                 sheet.setColumnView(i, 18);
             }
             sheet.setColumnView(2, 28);
             sheet.setColumnView(3, 24);
+            sheet.setColumnView(14, 20);
+            sheet.setColumnView(15, 20);
+            sheet.setColumnView(16, 20);
 
             workbook.write();
             JOptionPane.showMessageDialog(rootPane, "File Excel berhasil dibuat:\n" + file.getAbsolutePath());
@@ -1022,6 +1239,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
     private static class ReportSnapshot {
         private final String html;
         private final List<BarisLaporan> rows;
+        private final List<BarisPenjualan> rowsPenjualan;
         private final int totalPasienBpjs;
         private final int totalPasienUmum;
         private final double totalSkbsBpjs;
@@ -1029,18 +1247,28 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         private final double totalTindakanBpjs;
         private final double totalTindakanUmum;
         private final double totalHarga;
+        private final double totalBayarCash;
+        private final double totalBayarQris;
+        private final double totalOtcCash;
+        private final double totalOtcQris;
+        private final double totalMinumanCash;
+        private final double totalMinumanQris;
         private final double totalUsgBpjs;
         private final double totalUsgUmum;
         private final double totalObatBpjs;
         private final double totalObatGigiUmum;
         private final double totalObatPoliUmum;
 
-        private ReportSnapshot(String html, List<BarisLaporan> rows, int totalPasienBpjs, int totalPasienUmum,
+        private ReportSnapshot(String html, List<BarisLaporan> rows, List<BarisPenjualan> rowsPenjualan,
+                int totalPasienBpjs, int totalPasienUmum,
                 double totalSkbsBpjs, double totalSkbsUmum, double totalTindakanBpjs, double totalTindakanUmum,
-                double totalHarga, double totalUsgBpjs, double totalUsgUmum, double totalObatBpjs,
+                double totalHarga, double totalBayarCash, double totalBayarQris,
+                double totalOtcCash, double totalOtcQris, double totalMinumanCash, double totalMinumanQris,
+                double totalUsgBpjs, double totalUsgUmum, double totalObatBpjs,
                 double totalObatGigiUmum, double totalObatPoliUmum) {
             this.html = html;
             this.rows = rows;
+            this.rowsPenjualan = rowsPenjualan;
             this.totalPasienBpjs = totalPasienBpjs;
             this.totalPasienUmum = totalPasienUmum;
             this.totalSkbsBpjs = totalSkbsBpjs;
@@ -1048,6 +1276,12 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             this.totalTindakanBpjs = totalTindakanBpjs;
             this.totalTindakanUmum = totalTindakanUmum;
             this.totalHarga = totalHarga;
+            this.totalBayarCash = totalBayarCash;
+            this.totalBayarQris = totalBayarQris;
+            this.totalOtcCash = totalOtcCash;
+            this.totalOtcQris = totalOtcQris;
+            this.totalMinumanCash = totalMinumanCash;
+            this.totalMinumanQris = totalMinumanQris;
             this.totalUsgBpjs = totalUsgBpjs;
             this.totalUsgUmum = totalUsgUmum;
             this.totalObatBpjs = totalObatBpjs;
@@ -1072,6 +1306,12 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         private final double hargaTindakan;
         private final double usgBpjs;
         private final double usgUmum;
+        private final double bayarCash;
+        private final double bayarQris;
+        private final double penjualanOtcCash;
+        private final double penjualanOtcQris;
+        private final double penjualanMinumanCash;
+        private final double penjualanMinumanQris;
         private final double obatBpjs;
         private final double obatGigiUmum;
         private final double obatPoliUmum;
@@ -1079,7 +1319,9 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         private BarisLaporan(String hari, String tanggal, String namaDokter, String namaPoli,
                 String jamMulai, String jamSelesai, int jumlahPasienBpjs, int jumlahPasienUmum,
                 double skbsBpjs, double skbsUmum, double tindakanBpjs, double tindakanUmum,
-                double hargaTindakan, double usgBpjs, double usgUmum, double obatBpjs,
+                double hargaTindakan, double usgBpjs, double usgUmum, double bayarCash,
+                double bayarQris, double penjualanOtcCash, double penjualanOtcQris,
+                double penjualanMinumanCash, double penjualanMinumanQris, double obatBpjs,
                 double obatGigiUmum, double obatPoliUmum) {
             this.hari = hari;
             this.tanggal = tanggal;
@@ -1096,9 +1338,34 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             this.hargaTindakan = hargaTindakan;
             this.usgBpjs = usgBpjs;
             this.usgUmum = usgUmum;
+            this.bayarCash = bayarCash;
+            this.bayarQris = bayarQris;
+            this.penjualanOtcCash = penjualanOtcCash;
+            this.penjualanOtcQris = penjualanOtcQris;
+            this.penjualanMinumanCash = penjualanMinumanCash;
+            this.penjualanMinumanQris = penjualanMinumanQris;
             this.obatBpjs = obatBpjs;
             this.obatGigiUmum = obatGigiUmum;
             this.obatPoliUmum = obatPoliUmum;
+        }
+    }
+
+    private static class BarisPenjualan {
+        private final String hari;
+        private final String tanggal;
+        private final double otcCash;
+        private final double otcQris;
+        private final double minumanCash;
+        private final double minumanQris;
+
+        private BarisPenjualan(String hari, String tanggal, double otcCash, double otcQris,
+                double minumanCash, double minumanQris) {
+            this.hari = hari;
+            this.tanggal = tanggal;
+            this.otcCash = otcCash;
+            this.otcQris = otcQris;
+            this.minumanCash = minumanCash;
+            this.minumanQris = minumanQris;
         }
     }
 

@@ -22,6 +22,8 @@ import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -1346,7 +1348,10 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
                         catatan.getText(),Jenisjual.getSelectedItem().toString(),Double.toString(ongkir),Double.toString(besarppnobat),
                         status,kdgudang.getText(),kode_akun_bayar,AkunBayar.getSelectedItem().toString()}
                    )==true){
+                        sukses=simpanJamPenjualan(NoNota.getText());
+                        if(sukses==true){
                         simpan();
+                        }
                 }else{
                     autoNomor();
                     if(Sequel.menyimpantf2("penjualan","?,?,?,?,?,?,?,?,?,?,?,?,?","No.Nota",13,new String[]{
@@ -1354,7 +1359,10 @@ private void KdKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TKdKey
                             catatan.getText(),Jenisjual.getSelectedItem().toString(),Double.toString(ongkir),Double.toString(besarppnobat),
                             status,kdgudang.getText(),kode_akun_bayar,AkunBayar.getSelectedItem().toString()}
                        )==true){
+                            sukses=simpanJamPenjualan(NoNota.getText());
+                            if(sukses==true){
                             simpan();
+                            }
                     }else{
                         sukses=false;
                         autoNomor();
@@ -4206,6 +4214,35 @@ private void BtnGudangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         }else{
             tampil1();
         }
+    }
+
+    private String ambilJamPenjualan() {
+        String jamJual = Sequel.cariIsi("select date_format(current_time(),'%H:%i:%s')");
+        if((jamJual == null) || jamJual.trim().equals("")){
+            jamJual = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        }
+        return jamJual;
+    }
+
+    private boolean simpanJamPenjualan(String notaJual) {
+        if((notaJual == null) || notaJual.trim().equals("")){
+            return false;
+        }
+        if(hapusJamPenjualan(notaJual)==false){
+            return false;
+        }
+        return Sequel.queryu2tf(
+                "insert into jam_penjualan(nota_jual,jam_jual) values (?,?)",
+                2,
+                new String[]{notaJual,ambilJamPenjualan()}
+        );
+    }
+
+    private boolean hapusJamPenjualan(String notaJual) {
+        if((notaJual == null) || notaJual.trim().equals("")){
+            return false;
+        }
+        return Sequel.queryu2tf("delete from jam_penjualan where nota_jual=?",1,new String[]{notaJual});
     }
 
     private void tampildetailracikanobat() {
