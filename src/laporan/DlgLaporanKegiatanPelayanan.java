@@ -567,7 +567,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 "0 as admin_bpjs," +
                 "sum(case when " + kondisiPasienUmum + " and lower(ifnull(tag.status_item,''))='registrasi' then 1 else 0 end) as admin_umum," +
                 "0 as resep_bpjs," +
-                "count(distinct case when " + kondisiPasienUmum + " and tag.status_item='Obat' then rp.no_rawat else null end) as resep_umum," +
+                "count(distinct case when " + kondisiPasienUmum + " and tag.status_item='Obat' and ifnull(tag.nilai,0)>0 and trim(ifnull(tag.nama_item,''))<>'' and trim(ifnull(tag.nama_item,''))<>':' then rp.no_rawat else null end) as resep_umum," +
                 "0 as tindakan_bpjs," +
                 "sum(case when " + kondisiPasienUmum + " and lower(ifnull(tag.nama_item,'')) not like '%skbs%' and lower(ifnull(tag.nama_item,'')) not like '%usg%' and lower(ifnull(tag.status_item,''))<>'registrasi' and lower(ifnull(tag.nama_item,'')) not like '%obat%' and lower(ifnull(tag.nama_item,'')) not like '%resep%' and lower(ifnull(tag.nama_item,'')) not like '%farmasi%' then tag.qty else 0 end) as tindakan_umum," +
                 "sum(case when (" + kondisiPasienUmum + " and tag.sumber='billing') or (" + kondisiPasienBpjs + " and lower(ifnull(tag.nama_item,'')) like '%skbs%') then tag.nilai else 0 end) as harga_tindakan," +
@@ -916,51 +916,62 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         htmlBuilder.append("</table>");
         htmlBuilder.append("<br>");
 
-        double totalNominalPelayanan = totalHargaLokal;
-        double totalPembayaranPelayanan = totalBayarCashLokal + totalBayarQrisLokal;
-        double totalNominalOtc = totalOtcCashLokal + totalOtcQrisLokal;
-        double totalNominalMinuman = totalMinumanCashLokal + totalMinumanQrisLokal;
-        double totalCashKeseluruhan = totalBayarCashLokal + totalOtcCashLokal + totalMinumanCashLokal;
-        double totalQrisKeseluruhan = totalBayarQrisLokal + totalOtcQrisLokal + totalMinumanQrisLokal;
-        double totalNominalKeseluruhan = totalNominalPelayanan + totalNominalOtc + totalNominalMinuman;
-        double totalPembayaranKeseluruhan = totalPembayaranPelayanan + totalNominalOtc + totalNominalMinuman;
-
-        htmlBuilder.append("<table width='980px' border='0' align='center' cellpadding='0' cellspacing='0'>");
-        htmlBuilder.append("<tr class='judul'><td colspan='5'>Akumulasi Pelayanan, OTC, dan Minuman</td></tr>");
+        AkumulasiShift totalSemuaShift = hitungAkumulasiShift("", rows, rowsPenjualan);
+        htmlBuilder.append("<table width='1120px' border='0' align='center' cellpadding='0' cellspacing='0'>");
+        htmlBuilder.append("<tr class='judul'><td colspan='6'>Akumulasi Pelayanan, OTC, dan Minuman</td></tr>");
         htmlBuilder.append("<tr class='head'>");
+        htmlBuilder.append("<td width='140'>Shift</td>");
         htmlBuilder.append("<td width='280'>Sumber</td>");
         htmlBuilder.append("<td width='180'>Nominal</td>");
         htmlBuilder.append("<td width='170'>Cash</td>");
         htmlBuilder.append("<td width='170'>QRIS</td>");
         htmlBuilder.append("<td width='180'>Total</td>");
         htmlBuilder.append("</tr>");
-        htmlBuilder.append("<tr class='isi'>");
-        htmlBuilder.append("<td>Pelayanan / Harga Tindakan</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalNominalPelayanan)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalBayarCashLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalBayarQrisLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalPembayaranPelayanan)).append("</td>");
-        htmlBuilder.append("</tr>");
-        htmlBuilder.append("<tr class='isi'>");
-        htmlBuilder.append("<td>Penjualan OTC</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalNominalOtc)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalOtcCashLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalOtcQrisLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalNominalOtc)).append("</td>");
-        htmlBuilder.append("</tr>");
-        htmlBuilder.append("<tr class='isi'>");
-        htmlBuilder.append("<td>Penjualan Minuman</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalNominalMinuman)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalMinumanCashLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalMinumanQrisLokal)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalNominalMinuman)).append("</td>");
-        htmlBuilder.append("</tr>");
+        for (String namaShiftAkumulasi : URUTAN_SHIFT) {
+            AkumulasiShift akumulasiShift = hitungAkumulasiShift(namaShiftAkumulasi, rows, rowsPenjualan);
+            if (!akumulasiShift.adaData()) {
+                continue;
+            }
+            htmlBuilder.append("<tr class='isi'>");
+            htmlBuilder.append("<td class='tengah'>").append(escapeHtml(namaShiftAkumulasi)).append("</td>");
+            htmlBuilder.append("<td>Pelayanan / Harga Tindakan</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalNominalPelayanan())).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.pelayananCash)).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.pelayananQris)).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalPembayaranPelayanan())).append("</td>");
+            htmlBuilder.append("</tr>");
+            htmlBuilder.append("<tr class='isi'>");
+            htmlBuilder.append("<td class='tengah'>").append(escapeHtml(namaShiftAkumulasi)).append("</td>");
+            htmlBuilder.append("<td>Penjualan OTC</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalNominalOtc())).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.otcCash)).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.otcQris)).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalNominalOtc())).append("</td>");
+            htmlBuilder.append("</tr>");
+            htmlBuilder.append("<tr class='isi'>");
+            htmlBuilder.append("<td class='tengah'>").append(escapeHtml(namaShiftAkumulasi)).append("</td>");
+            htmlBuilder.append("<td>Penjualan Minuman</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalNominalMinuman())).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.minumanCash)).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.minumanQris)).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalNominalMinuman())).append("</td>");
+            htmlBuilder.append("</tr>");
+            htmlBuilder.append("<tr class='head2'>");
+            htmlBuilder.append("<td class='tengah'>").append(escapeHtml(namaShiftAkumulasi)).append("</td>");
+            htmlBuilder.append("<td>Total ").append(escapeHtml(namaShiftAkumulasi)).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalNominalKeseluruhan())).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalCashKeseluruhan())).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalQrisKeseluruhan())).append("</td>");
+            htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(akumulasiShift.totalPembayaranKeseluruhan())).append("</td>");
+            htmlBuilder.append("</tr>");
+        }
         htmlBuilder.append("<tr class='head2'>");
-        htmlBuilder.append("<td align='right'>Total Keseluruhan</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalNominalKeseluruhan)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalCashKeseluruhan)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalQrisKeseluruhan)).append("</td>");
-        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalPembayaranKeseluruhan)).append("</td>");
+        htmlBuilder.append("<td class='tengah'>Semua</td>");
+        htmlBuilder.append("<td>Total Keseluruhan</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalSemuaShift.totalNominalKeseluruhan())).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalSemuaShift.totalCashKeseluruhan())).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalSemuaShift.totalQrisKeseluruhan())).append("</td>");
+        htmlBuilder.append("<td class='kanan'>").append(Valid.SetAngka(totalSemuaShift.totalPembayaranKeseluruhan())).append("</td>");
         htmlBuilder.append("</tr>");
         htmlBuilder.append("</table>");
         htmlBuilder.append("</body></html>");
@@ -1286,48 +1297,57 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             sheet.addCell(new jxl.write.Number(6, row, totalMinumanQris));
             row += 2;
 
-            double totalNominalPelayanan = totalHarga;
-            double totalPembayaranPelayanan = totalBayarCash + totalBayarQris;
-            double totalNominalOtc = totalOtcCash + totalOtcQris;
-            double totalNominalMinuman = totalMinumanCash + totalMinumanQris;
-            double totalCashKeseluruhan = totalBayarCash + totalOtcCash + totalMinumanCash;
-            double totalQrisKeseluruhan = totalBayarQris + totalOtcQris + totalMinumanQris;
-            double totalNominalKeseluruhan = totalNominalPelayanan + totalNominalOtc + totalNominalMinuman;
-            double totalPembayaranKeseluruhan = totalPembayaranPelayanan + totalNominalOtc + totalNominalMinuman;
-
             sheet.addCell(new jxl.write.Label(0, row++, "Akumulasi Pelayanan, OTC, dan Minuman"));
-            String[] headerAkumulasi = {"Sumber", "Nominal", "Cash", "QRIS", "Total"};
+            String[] headerAkumulasi = {"Shift", "Sumber", "Nominal", "Cash", "QRIS", "Total"};
             for (int i = 0; i < headerAkumulasi.length; i++) {
                 sheet.addCell(new jxl.write.Label(i, row, headerAkumulasi[i]));
             }
             row++;
+            for (String namaShiftAkumulasi : URUTAN_SHIFT) {
+                AkumulasiShift akumulasiShift = hitungAkumulasiShift(namaShiftAkumulasi, dataLaporan, dataPenjualan);
+                if (!akumulasiShift.adaData()) {
+                    continue;
+                }
+                sheet.addCell(new jxl.write.Label(0, row, namaShiftAkumulasi));
+                sheet.addCell(new jxl.write.Label(1, row, "Pelayanan / Harga Tindakan"));
+                sheet.addCell(new jxl.write.Number(2, row, akumulasiShift.totalNominalPelayanan()));
+                sheet.addCell(new jxl.write.Number(3, row, akumulasiShift.pelayananCash));
+                sheet.addCell(new jxl.write.Number(4, row, akumulasiShift.pelayananQris));
+                sheet.addCell(new jxl.write.Number(5, row, akumulasiShift.totalPembayaranPelayanan()));
+                row++;
 
-            sheet.addCell(new jxl.write.Label(0, row, "Pelayanan / Harga Tindakan"));
-            sheet.addCell(new jxl.write.Number(1, row, totalNominalPelayanan));
-            sheet.addCell(new jxl.write.Number(2, row, totalBayarCash));
-            sheet.addCell(new jxl.write.Number(3, row, totalBayarQris));
-            sheet.addCell(new jxl.write.Number(4, row, totalPembayaranPelayanan));
-            row++;
+                sheet.addCell(new jxl.write.Label(0, row, namaShiftAkumulasi));
+                sheet.addCell(new jxl.write.Label(1, row, "Penjualan OTC"));
+                sheet.addCell(new jxl.write.Number(2, row, akumulasiShift.totalNominalOtc()));
+                sheet.addCell(new jxl.write.Number(3, row, akumulasiShift.otcCash));
+                sheet.addCell(new jxl.write.Number(4, row, akumulasiShift.otcQris));
+                sheet.addCell(new jxl.write.Number(5, row, akumulasiShift.totalNominalOtc()));
+                row++;
 
-            sheet.addCell(new jxl.write.Label(0, row, "Penjualan OTC"));
-            sheet.addCell(new jxl.write.Number(1, row, totalNominalOtc));
-            sheet.addCell(new jxl.write.Number(2, row, totalOtcCash));
-            sheet.addCell(new jxl.write.Number(3, row, totalOtcQris));
-            sheet.addCell(new jxl.write.Number(4, row, totalNominalOtc));
-            row++;
+                sheet.addCell(new jxl.write.Label(0, row, namaShiftAkumulasi));
+                sheet.addCell(new jxl.write.Label(1, row, "Penjualan Minuman"));
+                sheet.addCell(new jxl.write.Number(2, row, akumulasiShift.totalNominalMinuman()));
+                sheet.addCell(new jxl.write.Number(3, row, akumulasiShift.minumanCash));
+                sheet.addCell(new jxl.write.Number(4, row, akumulasiShift.minumanQris));
+                sheet.addCell(new jxl.write.Number(5, row, akumulasiShift.totalNominalMinuman()));
+                row++;
 
-            sheet.addCell(new jxl.write.Label(0, row, "Penjualan Minuman"));
-            sheet.addCell(new jxl.write.Number(1, row, totalNominalMinuman));
-            sheet.addCell(new jxl.write.Number(2, row, totalMinumanCash));
-            sheet.addCell(new jxl.write.Number(3, row, totalMinumanQris));
-            sheet.addCell(new jxl.write.Number(4, row, totalNominalMinuman));
-            row++;
+                sheet.addCell(new jxl.write.Label(0, row, namaShiftAkumulasi));
+                sheet.addCell(new jxl.write.Label(1, row, "Total " + namaShiftAkumulasi));
+                sheet.addCell(new jxl.write.Number(2, row, akumulasiShift.totalNominalKeseluruhan()));
+                sheet.addCell(new jxl.write.Number(3, row, akumulasiShift.totalCashKeseluruhan()));
+                sheet.addCell(new jxl.write.Number(4, row, akumulasiShift.totalQrisKeseluruhan()));
+                sheet.addCell(new jxl.write.Number(5, row, akumulasiShift.totalPembayaranKeseluruhan()));
+                row++;
+            }
 
-            sheet.addCell(new jxl.write.Label(0, row, "Total Keseluruhan"));
-            sheet.addCell(new jxl.write.Number(1, row, totalNominalKeseluruhan));
-            sheet.addCell(new jxl.write.Number(2, row, totalCashKeseluruhan));
-            sheet.addCell(new jxl.write.Number(3, row, totalQrisKeseluruhan));
-            sheet.addCell(new jxl.write.Number(4, row, totalPembayaranKeseluruhan));
+            AkumulasiShift totalSemuaShift = hitungAkumulasiShift("", dataLaporan, dataPenjualan);
+            sheet.addCell(new jxl.write.Label(0, row, "Semua"));
+            sheet.addCell(new jxl.write.Label(1, row, "Total Keseluruhan"));
+            sheet.addCell(new jxl.write.Number(2, row, totalSemuaShift.totalNominalKeseluruhan()));
+            sheet.addCell(new jxl.write.Number(3, row, totalSemuaShift.totalCashKeseluruhan()));
+            sheet.addCell(new jxl.write.Number(4, row, totalSemuaShift.totalQrisKeseluruhan()));
+            sheet.addCell(new jxl.write.Number(5, row, totalSemuaShift.totalPembayaranKeseluruhan()));
 
             for (int i = 0; i < header.length; i++) {
                 sheet.setColumnView(i, 18);
@@ -1360,6 +1380,30 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
         SwingUtilities.invokeLater(task);
     }
 
+    private static final String[] URUTAN_SHIFT = {"Shift 1", "Shift 2", "Luar Shift"};
+
+    private static AkumulasiShift hitungAkumulasiShift(String namaShift, List<BarisLaporan> rows, List<BarisPenjualan> rowsPenjualan) {
+        AkumulasiShift akumulasi = new AkumulasiShift(namaShift);
+        for (BarisLaporan item : rows) {
+            if (!akumulasi.cocok(item.namaShift)) {
+                continue;
+            }
+            akumulasi.pelayananNominal += item.hargaTindakan;
+            akumulasi.pelayananCash += item.bayarCash;
+            akumulasi.pelayananQris += item.bayarQris;
+        }
+        for (BarisPenjualan item : rowsPenjualan) {
+            if (!akumulasi.cocok(item.namaShift)) {
+                continue;
+            }
+            akumulasi.otcCash += item.otcCash;
+            akumulasi.otcQris += item.otcQris;
+            akumulasi.minumanCash += item.minumanCash;
+            akumulasi.minumanQris += item.minumanQris;
+        }
+        return akumulasi;
+    }
+
     private static class FilterLaporan {
         private final String tanggalAwal;
         private final String tanggalAkhir;
@@ -1382,6 +1426,62 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
             this.namaUnit = namaUnit;
             this.namaShift = namaShift;
             this.keyword = keyword;
+        }
+    }
+
+    private static class AkumulasiShift {
+        private final String namaShift;
+        private double pelayananNominal;
+        private double pelayananCash;
+        private double pelayananQris;
+        private double otcCash;
+        private double otcQris;
+        private double minumanCash;
+        private double minumanQris;
+
+        private AkumulasiShift(String namaShift) {
+            this.namaShift = namaShift;
+        }
+
+        private boolean cocok(String shiftItem) {
+            return namaShift == null || namaShift.isEmpty() || namaShift.equals(shiftItem);
+        }
+
+        private boolean adaData() {
+            return pelayananNominal != 0 || pelayananCash != 0 || pelayananQris != 0
+                    || otcCash != 0 || otcQris != 0 || minumanCash != 0 || minumanQris != 0;
+        }
+
+        private double totalNominalPelayanan() {
+            return pelayananNominal;
+        }
+
+        private double totalPembayaranPelayanan() {
+            return pelayananCash + pelayananQris;
+        }
+
+        private double totalNominalOtc() {
+            return otcCash + otcQris;
+        }
+
+        private double totalNominalMinuman() {
+            return minumanCash + minumanQris;
+        }
+
+        private double totalCashKeseluruhan() {
+            return pelayananCash + otcCash + minumanCash;
+        }
+
+        private double totalQrisKeseluruhan() {
+            return pelayananQris + otcQris + minumanQris;
+        }
+
+        private double totalNominalKeseluruhan() {
+            return totalNominalPelayanan() + totalNominalOtc() + totalNominalMinuman();
+        }
+
+        private double totalPembayaranKeseluruhan() {
+            return totalPembayaranPelayanan() + totalNominalOtc() + totalNominalMinuman();
         }
     }
 
