@@ -7,6 +7,7 @@ import fungsi.koneksiDB;
 import fungsi.sekuel;
 import fungsi.validasi;
 import fungsi.akses;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -64,6 +65,7 @@ public class DlgCariPenjualan extends javax.swing.JDialog {
     private FileReader myObj;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean ceksukses = false;
+    private final Map<Integer, Boolean> statusVerifikasiPerBaris = new HashMap<Integer, Boolean>();
     /** Creates new form DlgProgramStudi
      * @param parent
      * @param modal */
@@ -121,7 +123,7 @@ public class DlgCariPenjualan extends javax.swing.JDialog {
                 column.setPreferredWidth(130);
             }
         }
-        tbDokter.setDefaultRenderer(Object.class, new WarnaTable());
+        tbDokter.setDefaultRenderer(Object.class, new WarnaTablePenjualan());
 
         NoNota.setDocument(new batasInput((byte)25).getKata(NoNota));
         kdmem.setDocument(new batasInput((byte)15).getKata(kdmem));
@@ -1759,6 +1761,30 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
     private widget.Table tbDokter;
     // End of variables declaration//GEN-END:variables
 
+    private class WarnaTablePenjualan extends WarnaTable {
+        @Override
+        public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column){
+            java.awt.Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            if (isSelected) {
+                component.setBackground(table.getSelectionBackground());
+                component.setForeground(table.getSelectionForeground());
+                return component;
+            }
+
+            if (Boolean.TRUE.equals(statusVerifikasiPerBaris.get(row))) {
+                if (row % 2 == 1) {
+                    component.setBackground(new Color(223, 245, 223));
+                } else {
+                    component.setBackground(new Color(236, 250, 236));
+                }
+                component.setForeground(new Color(35, 85, 35));
+            } else {
+                component.setForeground(new Color(50,50,50));
+            }
+            return component;
+        }
+    }
+
     private void tampil() {
         tanggal="  penjualan.tgl_jual between '"+Valid.SetTgl(Tgl1.getSelectedItem()+"")+"' and '"+Valid.SetTgl(Tgl2.getSelectedItem()+"")+"' ";
         nofak="";mem="";ptg="";sat="";bar="";statusbayar="";datacari="";
@@ -1790,6 +1816,7 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
         }
 
         Valid.tabelKosong(tabMode);
+        statusVerifikasiPerBaris.clear();
         try{
             ttljual=0;
             ps=koneksi.prepareStatement("select penjualan.nota_jual, penjualan.tgl_jual, "+
@@ -1814,14 +1841,17 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                 ttltuslah=0;
                 ttldisc=0;
                 while(rs.next()){                    
+                    boolean sudahDiverifikasi = rs.getString("status").equals("Sudah Dibayar");
                     tabMode.addRow(new Object[]{
                         rs.getString(1),rs.getString(2),rs.getString(3)+", "+rs.getString(4),
                         rs.getString(5)+", "+rs.getString(6),rs.getString(7),rs.getString(8),
                         df2.format(rs.getDouble(12)),rs.getString(10),"","","","","",df2.format(rs.getDouble(9)),rs.getString(13)
                     });
+                    statusVerifikasiPerBaris.put(tabMode.getRowCount()-1, sudahDiverifikasi);
                     tabMode.addRow(new Object[]{
                         "","No.Batch","No.Nota","Barang","Satuan","Harga(Rp)","Jml","Subtotal(Rp)","Ptg(%)","Potongan(Rp)","Tambahan(Rp)","Embalase(Rp)","Tuslah(Rp)","Total","Aturan Pakai"
                     });
+                    statusVerifikasiPerBaris.put(tabMode.getRowCount()-1, sudahDiverifikasi);
                     ttlppn=ttlppn+rs.getDouble(12);
                     ttlongkir=ttlongkir+rs.getDouble(9);
                     ps2=koneksi.prepareStatement("select detailjual.kode_brng,databarang.nama_brng, detailjual.kode_sat,"+
@@ -1866,11 +1896,13 @@ private void ppHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                                 df2.format(rs2.getDouble("embalase")),df2.format(rs2.getDouble("tuslah")),
                                 df2.format(rs2.getDouble("total")),rs2.getString("aturan_pakai")
                             });
+                            statusVerifikasiPerBaris.put(tabMode.getRowCount()-1, sudahDiverifikasi);
                             no++;
                         }                        
                         tabMode.addRow(new Object[]{
                             "","Status : ",rs.getString("status"),"","Total :","","",df2.format(subttlall),"",df2.format(subttldisc),df2.format(subttltambahan),df2.format(subttlembalase),df2.format(subttltuslah),df2.format(subttljual),""
                         });                
+                        statusVerifikasiPerBaris.put(tabMode.getRowCount()-1, sudahDiverifikasi);
                     } catch (Exception e) {
                         System.out.println("Notifikasi : "+e);
                     } finally{

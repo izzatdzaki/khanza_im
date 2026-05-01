@@ -2,7 +2,9 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <comment>KhanzaHMS</comment> 
-    <entry key="HOST">jMN2XStVHX7PYVhf0/d4CQ==</entry>
+    <!--<entry key="HOST">wwHzCKiF1s8A9vK9WrAh0w==</entry>-->
+     <entry key="HOST">jMN2XStVHX7PYVhf0/d4CQ==</entry>
+    
     <entry key="DATABASE">C8Vhz/zHDzBl7UDsNwSmkw==</entry>
     <entry key="PORT">nioxtijcpDaKSUiUiP5FAg==</entry>
     <entry key="USER">3fsjwvKJn8IpzysMeNu3bA==</entry>
