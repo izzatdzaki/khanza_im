@@ -609,7 +609,7 @@ public class DlgLaporanKegiatanPelayanan extends javax.swing.JDialog {
                 "group by rp.tgl_registrasi,rp.kd_dokter,rp.kd_poli,shiftpay.nama_shift" +
                 ") as pay on pay.tgl_registrasi=base.tgl_registrasi and pay.kd_dokter=base.kd_dokter and pay.kd_poli=base.kd_poli and pay.nama_shift=base.nama_shift " +
                 "group by base.tgl_registrasi,base.kd_dokter,base.nm_dokter,base.kd_poli,base.nm_poli,base.nama_shift,base.jml_pasien_bpjs,base.jml_pasien_umum,periksa.jam_mulai,periksa.jam_selesai,trx.skbs_bpjs,trx.skbs_umum,trx.tindakan_bpjs,trx.tindakan_umum,trx.harga_tindakan,trx.usg_bpjs,trx.usg_umum,trx.admin_bpjs,trx.admin_umum,trx.resep_bpjs,trx.resep_umum,pay.bayar_cash,pay.bayar_qris,trx.obat_bpjs,trx.obat_gigi_umum,trx.obat_poli_umum " +
-                "order by base.tgl_registrasi,base.nm_dokter,base.nm_poli,field(base.nama_shift,'Shift 1','Shift 2','Luar Shift')";
+                "order by base.tgl_registrasi,field(base.nama_shift,'Shift 1','Shift 2','Luar Shift'),base.nm_dokter,base.nm_poli";
             ps = koneksi.prepareStatement(sql);
             int pIndex = 1;
             ps.setString(pIndex++, tanggalAwalSql);
