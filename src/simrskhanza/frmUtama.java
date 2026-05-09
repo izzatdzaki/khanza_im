@@ -1118,6 +1118,7 @@ import surat.SuratKlasifikasi;
 import surat.SuratMap;
 import surat.SuratMasuk;
 import surat.SuratPenolakanAnjuranMedis;
+import surat.SuratPernyataanEdukasiRujukan;
 import surat.SuratPernyataanMemilihDPJP;
 import surat.SuratPernyataanPasienUmum;
 import surat.SuratPersetujuanPemeriksaanHIV;
@@ -19710,6 +19711,18 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         aplikasi.setVisible(true);
         this.setCursor(Cursor.getDefaultCursor());
     }
+
+    private void btnPernyataanEdukasiRujukanActionPerformed(java.awt.event.ActionEvent evt) {
+        isTutup();
+        DlgHome.dispose();
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        SuratPernyataanEdukasiRujukan aplikasi=new SuratPernyataanEdukasiRujukan(this,false);
+        aplikasi.isCek();
+        aplikasi.setSize(PanelUtama.getWidth(), PanelUtama.getHeight());
+        aplikasi.setLocationRelativeTo(PanelUtama);
+        aplikasi.setVisible(true);
+        this.setCursor(Cursor.getDefaultCursor());
+    }
     
     private void btnKonselingFarmasiActionPerformed(java.awt.event.ActionEvent evt) {
         isTutup();
@@ -24047,7 +24060,7 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
             btnPemantauanPEWSAnak,btnMasterTemplateHasilRadiologi,btnLaporanBulananIRJ,btnMasterTemplatePemeriksaanDokter,btnPermintaanLabMB,btnLamaPelayananLabMB,
             btnPenilaianPreOperasi,btnPenilaianPreAnastesi,btnPersetujuanPulangAtasPermintanSendiri,btnPerencanaanPemulangan,btnPenilaianRisikoJatuhDewasa,
             btnPenilaianRisikoJatuhAnak,btnPenilaianAwalMedisRalanGeriatri,btnPenilaianTambahanGeriatri,btnSkriningNutrisiDewasa,btnHasilPemeriksaanUSG,
-            btnSkriningNutrisiLansia,btnSkriningNutrisiAnak,btnAkunRekeningHtHBankJabar,btnPembayaranBankJabar,btnPernyataanPasienUmum,btnKonselingFarmasi,
+            btnSkriningNutrisiLansia,btnSkriningNutrisiAnak,btnAkunRekeningHtHBankJabar,btnPembayaranBankJabar,btnPernyataanPasienUmum,btnPernyataanEdukasiRujukan,btnKonselingFarmasi,
             btnPelayananInformasiObat,btnPersetujuanUmum,btnTransferPasienAntarRuang,btnReferensiDokterSatuSehat,btnReferensiPasienSatuSehat,
             btnMappingOrganisasiSatuSehat,btnMappingLokasiSatuSehat,btnKirimEncounterSatuSehat,btnKirimEpisodeOfCareSatuSehat,btnCatatanCekGDS,btnKirimConditionSatuSehat,
             btnChecklistPreOperasi,btnKirimObservationTTVSatuSehat,btnSignInSebelumAnestesi,btnKirimProcedureSatuSehat,btnOperasiPerBulan,btnTimeOutSebelumInsisi,
@@ -29638,6 +29651,11 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
             
             if(akses.getsurat_pernyataan_pasien_umum()==true){
                 Panelmenu.add(btnPernyataanPasienUmum);
+                jmlmenu++;
+            }
+
+            if(akses.getsurat_pernyataan_pasien_umum()==true){
+                Panelmenu.add(btnPernyataanEdukasiRujukan);
                 jmlmenu++;
             }
             
@@ -35550,6 +35568,11 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         
         if(akses.getsurat_pernyataan_pasien_umum()==true){
             Panelmenu.add(btnPernyataanPasienUmum);
+            jmlmenu++;
+        }
+
+        if(akses.getsurat_pernyataan_pasien_umum()==true){
+            Panelmenu.add(btnPernyataanEdukasiRujukan);
             jmlmenu++;
         }
         
@@ -43620,6 +43643,13 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
                 jmlmenu++;
             }                
         }
+
+        if(akses.getsurat_pernyataan_pasien_umum()==true){
+            if(btnPernyataanEdukasiRujukan.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
+                Panelmenu.add(btnPernyataanEdukasiRujukan);
+                jmlmenu++;
+            }
+        }
         
         if(akses.getsurat_persetujuan_umum()==true){
             if(btnPersetujuanUmum.getText().toLowerCase().trim().contains(TCari.getText().toLowerCase().trim())){
@@ -47828,6 +47858,14 @@ private void MnGantiPasswordBtnLogActionPerformed(java.awt.event.ActionEvent evt
         btnPernyataanPasienUmum.setName("btnPernyataanPasienUmum"); 
         btnPernyataanPasienUmum.setPreferredSize(new java.awt.Dimension(200, 90));
         btnPernyataanPasienUmum.addActionListener(this::btnPernyataanPasienUmumActionPerformed);
+
+        btnPernyataanEdukasiRujukan = new widget.ButtonBig();
+        btnPernyataanEdukasiRujukan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/48x48/Edit-Male-User.png")));
+        btnPernyataanEdukasiRujukan.setText("Surat Pernyataan Edukasi Rujukan");
+        btnPernyataanEdukasiRujukan.setIconTextGap(0);
+        btnPernyataanEdukasiRujukan.setName("btnPernyataanEdukasiRujukan");
+        btnPernyataanEdukasiRujukan.setPreferredSize(new java.awt.Dimension(200, 90));
+        btnPernyataanEdukasiRujukan.addActionListener(this::btnPernyataanEdukasiRujukanActionPerformed);
         
         btnKonselingFarmasi = new widget.ButtonBig();
         btnKonselingFarmasi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/48x48/6771587_diary_education_learning_pencil_school_icon.png")));

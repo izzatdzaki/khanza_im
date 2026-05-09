@@ -250,6 +250,7 @@ import surat.SuratKeteranganLayakTerbang;
 import surat.SuratKeteranganSehat;
 import surat.SuratKewaspadaanKesehatan;
 import surat.SuratPenolakanAnjuranMedis;
+import surat.SuratPernyataanEdukasiRujukan;
 import surat.SuratPernyataanMemilihDPJP;
 import surat.SuratPernyataanPasienUmum;
 import surat.SuratPersetujuanPemeriksaanHIV;
@@ -630,6 +631,7 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
         MnPersetujuanPenolakanTindakan = new javax.swing.JMenuItem();
         MnPulangAtasPermintaanSendiri = new javax.swing.JMenuItem();
         MnPernyataanPasienUmum = new javax.swing.JMenuItem();
+        MnPernyataanEdukasiRujukan = new javax.swing.JMenuItem();
         MnPersetujuanRawatInap = new javax.swing.JMenuItem();
         MnPersetujuanPenundaanPelayanan = new javax.swing.JMenuItem();
         MnPenolakanAnjuranMedis = new javax.swing.JMenuItem();
@@ -3392,6 +3394,21 @@ public final class DlgKasirRalan extends javax.swing.JDialog {
         MnPernyataanPasienUmum.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 MnPernyataanPasienUmumActionPerformed(evt);
+            }
+        });
+
+        MnPernyataanEdukasiRujukan.setBackground(new java.awt.Color(255, 255, 254));
+        MnPernyataanEdukasiRujukan.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        MnPernyataanEdukasiRujukan.setForeground(new java.awt.Color(50, 50, 50));
+        MnPernyataanEdukasiRujukan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        MnPernyataanEdukasiRujukan.setText("Surat Pernyataan Edukasi Rujukan");
+        MnPernyataanEdukasiRujukan.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        MnPernyataanEdukasiRujukan.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        MnPernyataanEdukasiRujukan.setName("MnPernyataanEdukasiRujukan"); // NOI18N
+        MnPernyataanEdukasiRujukan.setPreferredSize(new java.awt.Dimension(230, 26));
+        MnPernyataanEdukasiRujukan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MnPernyataanEdukasiRujukanActionPerformed(evt);
             }
         });
 
@@ -9078,7 +9095,15 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
                     }
                 }
             });
-        } 
+        }
+        
+        SwingUtilities.invokeLater(() -> {
+            if(TabRawat.getSelectedIndex()==0){
+                tampilkasir();
+            }else if(TabRawat.getSelectedIndex()==1){
+                tampilkasir2();
+            }
+        });
     }
     private void tbKasirRalan2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbKasirRalan2MouseClicked
         if(tabModekasir2.getRowCount()!=0){
@@ -12680,6 +12705,31 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
         }
     }//GEN-LAST:event_MnPernyataanPasienUmumActionPerformed
 
+    private void MnPernyataanEdukasiRujukanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnPernyataanEdukasiRujukanActionPerformed
+        if(tabModekasir.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, table masih kosong...!!!!");
+            TCari.requestFocus();
+        }else if(TPasienCari.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu dengan menklik data pada table...!!!");
+            tbKasirRalan.requestFocus();
+        }else{
+            if(tbKasirRalan.getSelectedRow()!= -1){
+                if(Sequel.cariInteger("select count(kamar_inap.no_rawat) from kamar_inap where kamar_inap.no_rawat=?",TNoRw.getText())>0){
+                    JOptionPane.showMessageDialog(null,"Maaf, Pasien sudah masuk Kamar Inap. Gunakan billing Ranap..!!!");
+                }else {
+                    SuratPernyataanEdukasiRujukan resume=new SuratPernyataanEdukasiRujukan(null,false);
+                    resume.isCek();
+                    resume.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+                    resume.setLocationRelativeTo(internalFrame1);
+                    resume.setVisible(true);
+                    resume.emptTeks();
+                    resume.setNoRm(TNoRw.getText(),DTPCari2.getDate());
+                    this.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        }
+    }//GEN-LAST:event_MnPernyataanEdukasiRujukanActionPerformed
+
     private void MnKonselingFarmasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnKonselingFarmasiActionPerformed
         if(tabModekasir.getRowCount()==0){
             JOptionPane.showMessageDialog(null,"Maaf, table masih kosong...!!!!");
@@ -15780,6 +15830,7 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
     private javax.swing.JMenuItem MnPermintaanRadiologi1;
     private javax.swing.JMenuItem MnPermintaanRanap;
     private javax.swing.JMenuItem MnPermintaanRanap1;
+    private javax.swing.JMenuItem MnPernyataanEdukasiRujukan;
     private javax.swing.JMenuItem MnPernyataanPasienUmum;
     private javax.swing.JMenuItem MnPersetujuanPenolakanTindakan;
     private javax.swing.JMenuItem MnPersetujuanPenundaanPelayanan;
@@ -16313,6 +16364,7 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
         ppMonitoringAsuhanGizi.setEnabled(akses.getmonitoring_asuhan_gizi()); 
         ppAsuhanGizi.setEnabled(akses.getasuhan_gizi());
         MnPernyataanPasienUmum.setEnabled(akses.getsurat_pernyataan_pasien_umum());
+        MnPernyataanEdukasiRujukan.setEnabled(akses.getsurat_pernyataan_pasien_umum());
         MnKonselingFarmasi.setEnabled(akses.getkonseling_farmasi());
         MnPermintaanInformasiObat.setEnabled(akses.getpelayanan_informasi_obat());
         MnPersetujuanUmum.setEnabled(akses.getsurat_persetujuan_umum());
@@ -18305,6 +18357,7 @@ private void MnDataPemberianObatActionPerformed(java.awt.event.ActionEvent evt) 
         MnSuratPersetujuan.add(MnPersetujuanPenolakanTindakan);
         MnSuratPersetujuan.add(MnPulangAtasPermintaanSendiri);
         MnSuratPersetujuan.add(MnPernyataanPasienUmum);
+        MnSuratPersetujuan.add(MnPernyataanEdukasiRujukan);
         MnSuratPersetujuan.add(MnPersetujuanRawatInap);
         MnSuratPersetujuan.add(MnPersetujuanPenundaanPelayanan);
         MnSuratPersetujuan.add(MnPenolakanAnjuranMedis);

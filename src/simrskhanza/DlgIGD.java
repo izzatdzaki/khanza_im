@@ -215,6 +215,7 @@ import surat.SuratKeteranganCovid;
 import surat.SuratKeteranganLayakTerbang;
 import surat.SuratKewaspadaanKesehatan;
 import surat.SuratPenolakanAnjuranMedis;
+import surat.SuratPernyataanEdukasiRujukan;
 import surat.SuratPernyataanMemilihDPJP;
 import surat.SuratPernyataanPasienUmum;
 import surat.SuratPersetujuanPemeriksaanHIV;
@@ -649,6 +650,7 @@ public final class DlgIGD extends javax.swing.JDialog {
         MnPersetujuanPenolakanTindakan = new javax.swing.JMenuItem();
         MnPulangAtasPermintaanSendiri = new javax.swing.JMenuItem();
         MnPernyataanPasienUmum = new javax.swing.JMenuItem();
+        MnPernyataanEdukasiRujukan = new javax.swing.JMenuItem();
         MnPersetujuanRawatInap = new javax.swing.JMenuItem();
         MnPersetujuanPenundaanPelayanan = new javax.swing.JMenuItem();
         MnPenolakanAnjuranMedis = new javax.swing.JMenuItem();
@@ -2734,6 +2736,21 @@ public final class DlgIGD extends javax.swing.JDialog {
         MnPernyataanPasienUmum.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 MnPernyataanPasienUmumActionPerformed(evt);
+            }
+        });
+
+        MnPernyataanEdukasiRujukan.setBackground(new java.awt.Color(255, 255, 254));
+        MnPernyataanEdukasiRujukan.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
+        MnPernyataanEdukasiRujukan.setForeground(new java.awt.Color(50, 50, 50));
+        MnPernyataanEdukasiRujukan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/picture/category.png"))); // NOI18N
+        MnPernyataanEdukasiRujukan.setText("Surat Pernyataan Edukasi Rujukan");
+        MnPernyataanEdukasiRujukan.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        MnPernyataanEdukasiRujukan.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        MnPernyataanEdukasiRujukan.setName("MnPernyataanEdukasiRujukan"); // NOI18N
+        MnPernyataanEdukasiRujukan.setPreferredSize(new java.awt.Dimension(230, 26));
+        MnPernyataanEdukasiRujukan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MnPernyataanEdukasiRujukanActionPerformed(evt);
             }
         });
 
@@ -9739,6 +9756,28 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
         }
     }//GEN-LAST:event_MnPernyataanPasienUmumActionPerformed
 
+    private void MnPernyataanEdukasiRujukanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnPernyataanEdukasiRujukanActionPerformed
+        if(tabMode.getRowCount()==0){
+            JOptionPane.showMessageDialog(null,"Maaf, data registrasi sudah habis...!!!!");
+            TNoRM.requestFocus();
+        }else if(TPasien.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null,"Maaf, Silahkan anda pilih dulu data pasien dengan menklik data pada table...!!!");
+            tbPetugas.requestFocus();
+        }else{
+            if(tbPetugas.getSelectedRow()!= -1){
+                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                SuratPernyataanEdukasiRujukan form=new SuratPernyataanEdukasiRujukan(null,false);
+                form.isCek();
+                form.setSize(internalFrame1.getWidth()-20,internalFrame1.getHeight()-20);
+                form.setLocationRelativeTo(internalFrame1);
+                form.setVisible(true);
+                form.emptTeks();
+                form.setNoRm(TNoRw.getText(),DTPCari2.getDate());
+                this.setCursor(Cursor.getDefaultCursor());
+            }
+        }
+    }//GEN-LAST:event_MnPernyataanEdukasiRujukanActionPerformed
+
     private void MnKonselingFarmasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MnKonselingFarmasiActionPerformed
         if(tabMode.getRowCount()==0){
             JOptionPane.showMessageDialog(null,"Maaf, data registrasi sudah habis...!!!!");
@@ -12379,6 +12418,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
     private javax.swing.JMenuItem MnPermintaanLab;
     private javax.swing.JMenuItem MnPermintaanRadiologi;
     private javax.swing.JMenuItem MnPermintaanRanap;
+    private javax.swing.JMenuItem MnPernyataanEdukasiRujukan;
     private javax.swing.JMenuItem MnPernyataanPasienUmum;
     private javax.swing.JMenuItem MnPersetujuanPenolakanTindakan;
     private javax.swing.JMenuItem MnPersetujuanPenundaanPelayanan;
@@ -12903,6 +12943,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
         ppMonitoringAsuhanGizi.setEnabled(akses.getmonitoring_asuhan_gizi()); 
         ppAsuhanGizi.setEnabled(akses.getasuhan_gizi());
         MnPernyataanPasienUmum.setEnabled(akses.getsurat_pernyataan_pasien_umum());
+        MnPernyataanEdukasiRujukan.setEnabled(akses.getsurat_pernyataan_pasien_umum());
         MnKonselingFarmasi.setEnabled(akses.getkonseling_farmasi());
         MnPermintaanInformasiObat.setEnabled(akses.getpelayanan_informasi_obat());
         MnPersetujuanUmum.setEnabled(akses.getsurat_persetujuan_umum());
@@ -14154,6 +14195,7 @@ private void MnLaporanRekapKunjunganBulananPoliActionPerformed(java.awt.event.Ac
         MnSuratPersetujuan.add(MnPersetujuanPenolakanTindakan);
         MnSuratPersetujuan.add(MnPulangAtasPermintaanSendiri);
         MnSuratPersetujuan.add(MnPernyataanPasienUmum);
+        MnSuratPersetujuan.add(MnPernyataanEdukasiRujukan);
         MnSuratPersetujuan.add(MnPersetujuanRawatInap);
         MnSuratPersetujuan.add(MnPersetujuanPenundaanPelayanan);
         MnSuratPersetujuan.add(MnPenolakanAnjuranMedis);
