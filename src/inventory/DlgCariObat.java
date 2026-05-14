@@ -42,6 +42,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -101,6 +103,7 @@ public final class DlgCariObat extends javax.swing.JDialog {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean ceksukses = false;
     private DlgCariAturanPakai aturanpakai;
+    private boolean prosesSimpanBerjalan=false;
     
     /** Creates new form DlgPenyakit
      * @param parent
@@ -1170,7 +1173,11 @@ public final class DlgCariObat extends javax.swing.JDialog {
         this.setCursor(Cursor.getDefaultCursor());           
     }//GEN-LAST:event_BtnTambahActionPerformed
 
-private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
+    private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSimpanActionPerformed
+        if(prosesSimpanBerjalan==true){
+            return;
+        }
+        LoadPengaturan();
         if(VALIDASIULANGBERIOBAT.equals("yes")){
             for(i=0;i<tbObat.getRowCount();i++){ 
                 if(Valid.SetAngka(tbObat.getValueAt(i,1).toString())>0){
@@ -1188,13 +1195,22 @@ private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
             Valid.textKosong(TCari,"Data");
         }else if(kdgudang.getText().equals("")){
             Valid.textKosong(TCari,"Lokasi");
+        }else if(validasiAkunJurnalObatRalan().equals("")==false){
+            JOptionPane.showMessageDialog(null,validasiAkunJurnalObatRalan());
         }else if(ttl<=0){
             JOptionPane.showMessageDialog(null,"Maaf, silahkan masukkan terlebih dahulu obat yang mau diberikan...!!!");
             TCari.requestFocus();
         }else{
             int reply = JOptionPane.showConfirmDialog(rootPane,"Eeiiiiiits, udah bener belum data yang mau disimpan..??","Konfirmasi",JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.YES_OPTION) {
+                prosesSimpanBerjalan=true;
+                BtnSimpan.setEnabled(false);
                 try {  
+                    String pesanDuplikasi=validasiDuplikasiSebelumSimpan();
+                    if(!pesanDuplikasi.equals("")){
+                        JOptionPane.showMessageDialog(null,pesanDuplikasi);
+                        return;
+                    }
                     ChkJln.setSelected(false);
                     Sequel.AutoComitFalse();
                     sukses=true;
@@ -1570,6 +1586,9 @@ private void BtnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
                     }
                 } catch (Exception ex) {
                     System.out.println(ex);                
+                } finally{
+                    prosesSimpanBerjalan=false;
+                    BtnSimpan.setEnabled(true);
                 }
             }                
         }
@@ -3485,6 +3504,142 @@ private void JeniskelasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:even
             }
         }
     }
+
+    private String getTanggalPerawatan(){
+        return Valid.SetTgl(DTPTgl.getSelectedItem()+"");
+    }
+
+    private String getJamPerawatan(){
+        return cmbJam.getSelectedItem()+":"+cmbMnt.getSelectedItem()+":"+cmbDtk.getSelectedItem();
+    }
+
+    private boolean cekDuplikasiData(String sql,String[] parameter){
+        boolean ada=false;
+        PreparedStatement pscek=null;
+        ResultSet rscek=null;
+        try {
+            pscek=koneksi.prepareStatement(sql);
+            for(int x=0;x<parameter.length;x++){
+                pscek.setString(x+1,parameter[x]);
+            }
+            rscek=pscek.executeQuery();
+            if(rscek.next()){
+                ada=rscek.getInt(1)>0;
+            }
+        } catch (Exception e) {
+            System.out.println("Notifikasi Cek Duplikasi : "+e);
+        } finally{
+            try {
+                if(rscek!=null){
+                    rscek.close();
+                }
+            } catch (Exception e) {
+                System.out.println("Notifikasi Cek Duplikasi : "+e);
+            }
+            try {
+                if(pscek!=null){
+                    pscek.close();
+                }
+            } catch (Exception e) {
+                System.out.println("Notifikasi Cek Duplikasi : "+e);
+            }
+        }
+        return ada;
+    }
+
+    private String validasiDuplikasiSebelumSimpan(){
+        String tanggal=getTanggalPerawatan();
+        String jam=getJamPerawatan();
+        Set<String> detailObatDipilih=new HashSet<String>();
+        Set<String> racikanDipilih=new HashSet<String>();
+        Set<String> detailRacikanDipilih=new HashSet<String>();
+
+        for(int baris=0;baris<tbObat.getRowCount();baris++){
+            if(Valid.SetAngka(tbObat.getValueAt(baris,1).toString())>0){
+                String kodeBrng=tbObat.getValueAt(baris,2).toString();
+                String namaBrng=tbObat.getValueAt(baris,3).toString();
+                String noBatch=tbObat.getValueAt(baris,16).toString();
+                String noFaktur=tbObat.getValueAt(baris,17).toString();
+                String kunci=kodeBrng+"|"+noBatch+"|"+noFaktur;
+                if(detailObatDipilih.add(kunci)==false){
+                    return "Obat "+namaBrng+" terinput lebih dari sekali pada jam yang sama. Gabungkan jumlahnya dulu sebelum disimpan.";
+                }
+                if(cekDuplikasiData(
+                        "select count(*) from detail_pemberian_obat where tgl_perawatan=? and jam=? and no_rawat=? and kode_brng=? and no_batch=? and no_faktur=?",
+                        new String[]{tanggal,jam,TNoRw.getText(),kodeBrng,noBatch,noFaktur}
+                )){
+                    return "Obat "+namaBrng+" sudah tersimpan pada "+tanggal+" "+jam+". Refresh data dulu agar tidak tersimpan ganda.";
+                }
+            }
+        }
+
+        for(int baris=0;baris<tbObatRacikan.getRowCount();baris++){
+            if(Valid.SetAngka(tbObatRacikan.getValueAt(baris,4).toString())>0){
+                String noRacik=tbObatRacikan.getValueAt(baris,0).toString();
+                String namaRacik=tbObatRacikan.getValueAt(baris,1).toString();
+                if(racikanDipilih.add(noRacik)==false){
+                    return "Racikan "+namaRacik+" terinput lebih dari sekali. Periksa kembali daftar racikan sebelum disimpan.";
+                }
+                if(cekDuplikasiData(
+                        "select count(*) from obat_racikan where tgl_perawatan=? and jam=? and no_rawat=? and no_racik=?",
+                        new String[]{tanggal,jam,TNoRw.getText(),noRacik}
+                )){
+                    return "Racikan "+namaRacik+" sudah tersimpan pada "+tanggal+" "+jam+". Refresh data dulu agar tidak tersimpan ganda.";
+                }
+            }
+        }
+
+        for(int baris=0;baris<tbDetailObatRacikan.getRowCount();baris++){
+            if(Valid.SetAngka(tbDetailObatRacikan.getValueAt(baris,10).toString())>0){
+                String noRacik=tbDetailObatRacikan.getValueAt(baris,0).toString();
+                String kodeBrng=tbDetailObatRacikan.getValueAt(baris,1).toString();
+                String namaBrng=tbDetailObatRacikan.getValueAt(baris,2).toString();
+                String noBatch=tbDetailObatRacikan.getValueAt(baris,16).toString();
+                String noFaktur=tbDetailObatRacikan.getValueAt(baris,17).toString();
+                String kunci=noRacik+"|"+kodeBrng;
+                if(detailRacikanDipilih.add(kunci)==false){
+                    return "Detail obat racikan "+namaBrng+" untuk racikan "+noRacik+" terinput lebih dari sekali.";
+                }
+                if(cekDuplikasiData(
+                        "select count(*) from detail_obat_racikan where tgl_perawatan=? and jam=? and no_rawat=? and no_racik=? and kode_brng=?",
+                        new String[]{tanggal,jam,TNoRw.getText(),noRacik,kodeBrng}
+                )){
+                    return "Detail obat racikan "+namaBrng+" sudah tersimpan pada "+tanggal+" "+jam+". Refresh data dulu agar tidak tersimpan ganda.";
+                }
+                if(cekDuplikasiData(
+                        "select count(*) from detail_pemberian_obat where tgl_perawatan=? and jam=? and no_rawat=? and kode_brng=? and no_batch=? and no_faktur=?",
+                        new String[]{tanggal,jam,TNoRw.getText(),kodeBrng,noBatch,noFaktur}
+                )){
+                    return "Obat "+namaBrng+" pada racikan sudah tercatat di pemberian obat pada "+tanggal+" "+jam+". Periksa kemungkinan simpan ganda.";
+                }
+            }
+        }
+        return "";
+    }
+
+    private String validasiAkunJurnalObatRalan(){
+        StringBuilder pesan = new StringBuilder();
+
+        if(akunobatralan.getSuspen_Piutang_Obat_Ralan().trim().equals("")){
+            pesan.append("Suspen Piutang Obat Ralan, ");
+        }
+        if(akunobatralan.getObat_Ralan().trim().equals("")){
+            pesan.append("Obat Ralan, ");
+        }
+        if(akunobatralan.getHPP_Obat_Rawat_Jalan().trim().equals("")){
+            pesan.append("HPP Obat Rawat Jalan, ");
+        }
+        if(akunobatralan.getPersediaan_Obat_Rawat_Jalan().trim().equals("")){
+            pesan.append("Persediaan Obat Rawat Jalan, ");
+        }
+
+        if(pesan.length()>0){
+            return "Pengaturan akun jurnal obat rawat jalan belum lengkap.\nLengkapi akun berikut di Set Akun Ralan:\n" +
+                   pesan.substring(0,pesan.length()-2);
+        }
+
+        return "";
+    }
     
     public void setNoRm(String norwt,String norm,String nama,String tanggal, String jam) {        
         aktifpcare="no";
@@ -4285,7 +4440,10 @@ private void JeniskelasKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:even
             ppnralan.SetPPNRalan();
         }
         
-        if(akunobatralan.getSuspen_Piutang_Obat_Ralan().equals("")){
+        if(akunobatralan.getSuspen_Piutang_Obat_Ralan().equals("")||
+           akunobatralan.getObat_Ralan().equals("")||
+           akunobatralan.getHPP_Obat_Rawat_Jalan().equals("")||
+           akunobatralan.getPersediaan_Obat_Rawat_Jalan().equals("")){
             akunobatralan.SetAkunObatRalan();
         }
         
